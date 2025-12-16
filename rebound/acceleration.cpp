@@ -22,7 +22,7 @@
 
 namespace rebound {
   namespace _accel {
-    void calc_accel_none(_ParticleStore& particles) {
+    void calc_accel_none(ParticleStore& particles) {
       const size_t N = particles.size();
 #pragma omp parallel for
       for (size_t i = 0; i < N; ++i) {
@@ -30,7 +30,7 @@ namespace rebound {
       }
     }
 
-    void calc_accel_basic(_ParticleStore& particles, double softening2) {
+    void calc_accel_basic(ParticleStore& particles, double softening2) {
       const size_t N = particles.size();
 
       // Zero accelerations
@@ -76,7 +76,7 @@ namespace rebound {
           particles.accelerations[i] += temp_acc[t][i];
       }
 
-    void calc_accel_jacobi(_ParticleStore& particles, double softening2) {
+    void calc_accel_jacobi(ParticleStore& particles, double softening2) {
       const size_t N = particles.size();
 
 #pragma omp parallel for
@@ -118,7 +118,7 @@ namespace rebound {
           particles.accelerations[i] += temp_acc[t][i];
       }
 
-    void calc_accel_compensated(_ParticleStore& particles, double softening2) {
+    void calc_accel_compensated(ParticleStore& particles, double softening2) {
       const size_t N = particles.size();
 
       if (particles.gravity_cs.size() < N)
@@ -151,7 +151,7 @@ namespace rebound {
         }
       }
 
-    void calc_accel_mercurius(_ParticleStore& particles, double softening2, _MercuriusSettings settings) {
+    void calc_accel_mercurius(ParticleStore& particles, double softening2, _MercuriusSettings settings) {
       calc_accel_basic(particles, softening2);
       }
     } // namespace _accel

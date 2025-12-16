@@ -23,9 +23,9 @@
 #define COMB_RAD2(i, j) (particles.radii[i] + particles.radii[j]) * (particles.radii[i] + particles.radii[j])
 
 namespace rebound {
-  bool CollisionHandler::collision_direct(size_t i, size_t j, const _ParticleStore &particles) { return particles.positions[i].distance2(particles.positions[j]) < COMB_RAD2(i, j); }
+  bool CollisionHandler::collision_direct(size_t i, size_t j, const ParticleStore &particles) { return particles.positions[i].distance2(particles.positions[j]) < COMB_RAD2(i, j); }
 
-  bool CollisionHandler::collision_line(size_t i, size_t j, const _ParticleStore &particles, std::vector<Vec3> prev_pos) {
+  bool CollisionHandler::collision_line(size_t i, size_t j, const ParticleStore &particles, std::vector<Vec3> prev_pos) {
     Vec3 a = prev_pos[j] - prev_pos[i];
     Vec3 d = a - (particles.positions[j] - particles.positions[i]);
 
@@ -34,7 +34,7 @@ namespace rebound {
     return v.mag2() < COMB_RAD2(i, j);
   }
 
-  bool CollisionHandler::detect_collision(_ParticleStore &particles) {
+  bool CollisionHandler::detect_collision(ParticleStore &particles) {
     if (handler && (detect != CollisionDetection::NONE)) {
       std::unordered_set<size_t> indices;
       size_t N = particles.size();
@@ -71,7 +71,7 @@ namespace rebound {
     pair<bool, std::vector<size_t>> merge(const Collision &c) {
       size_t i = c.p1_i;
       size_t j = c.p2_i;
-      _ParticleStore &particles = *c.particles;
+      ParticleStore &particles = *c.particles;
       Vec3 pos_i = particles.positions[i];
       Vec3 pos_j = particles.positions[j];
       Vec3 vel_i = particles.velocities[i];

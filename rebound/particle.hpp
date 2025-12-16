@@ -38,7 +38,7 @@ namespace rebound {
 
   template <typename T>
   using ExtParamMap = std::vector<pair<std::string, std::vector<T>>>;
-  struct _ParticleStore {
+  struct ParticleStore {
     std::vector<Vec3> positions;
     std::vector<Vec3> velocities;
     std::vector<Vec3> accelerations;
@@ -65,7 +65,7 @@ namespace rebound {
     void reserve_hash_ex_param(const std::string &name);
     void reserve_ptr_ex_param(const std::string &name);
 
-    _ParticleStore(size_t capacity = 0);
+    ParticleStore(size_t capacity = 0);
 
     size_t size() const;
     size_t n_real() const;
@@ -81,10 +81,10 @@ namespace rebound {
   private:
     size_t index;
     uint32_t version;
-    _ParticleStore& store;
-    Particle(size_t idx, _ParticleStore& store_) : index(idx), store(store_) {}
+    ParticleStore& store;
+    Particle(size_t idx, ParticleStore& store_) : index(idx), store(store_) {}
   public:
-    Particle(_ParticleStore& store_, const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass = false);
+    Particle(ParticleStore& store_, const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass = false);
 
     Vec3& pos();
     Vec3& vel();
@@ -104,7 +104,7 @@ namespace rebound {
 
     ind_Particle snap() const;
 
-    friend _ParticleStore;
+    friend ParticleStore;
   };
 
   struct Orbit {

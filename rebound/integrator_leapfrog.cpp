@@ -19,14 +19,14 @@
 #include "integrator.hpp"
 
 namespace rebound {
-  void Integrator::step_leapfrog_p1(_ParticleStore& particles, double dt) const {
+  void Integrator::step_leapfrog_p1(ParticleStore& particles, double dt) const {
     const size_t N = particles.size();
 
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) particles.positions[i] += dt / 2 * particles.velocities[i];
   }
 
-  void Integrator::step_leapfrog_p2(_ParticleStore& particles, double dt) const {
+  void Integrator::step_leapfrog_p2(ParticleStore& particles, double dt) const {
     const size_t N = particles.size();
 
     double dt_half = dt / 2;

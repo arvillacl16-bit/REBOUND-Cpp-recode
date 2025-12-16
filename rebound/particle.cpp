@@ -21,7 +21,7 @@
 #include <cmath>
 
 namespace rebound {
-  _ParticleStore::_ParticleStore(size_t capacity) {
+  ParticleStore::ParticleStore(size_t capacity) {
     positions.reserve(capacity);
     velocities.reserve(capacity);
     accelerations.reserve(capacity);
@@ -32,9 +32,9 @@ namespace rebound {
     test_mass.reserve(capacity);
   }
 
-  size_t _ParticleStore::size() const { return positions.size(); }
+  size_t ParticleStore::size() const { return positions.size(); }
 
-  size_t _ParticleStore::n_real() const {
+  size_t ParticleStore::n_real() const {
     size_t n = 0;
     for (size_t i = 0; i < size(); i++) {
       if (!test_mass[i]) ++n;
@@ -42,7 +42,7 @@ namespace rebound {
     return n;
   }
 
-  Particle _ParticleStore::add_particle(const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass_) {
+  Particle ParticleStore::add_particle(const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass_) {
     positions.push_back(position);
     velocities.push_back(velocity);
     accelerations.push_back(Vec3());
@@ -55,7 +55,7 @@ namespace rebound {
     return Particle(size() - 1, *this);
   }
 
-  void _ParticleStore::remove_particle(size_t idx) {
+  void ParticleStore::remove_particle(size_t idx) {
     versions[idx]++;
 
     size_t last_idx = size() - 1;
@@ -81,7 +81,7 @@ namespace rebound {
     versions.pop_back();
   }
 
-  Particle::Particle(_ParticleStore& store_, const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass_)
+  Particle::Particle(ParticleStore& store_, const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass_)
     : index(store_.size()), store(store_), version(0) { store.add_particle(position, velocity, mu, radius, id, test_mass_); }
 
   Vec3& Particle::pos() {
@@ -259,8 +259,8 @@ namespace rebound {
     return ind_Particle(position, velocity, mu, secondary.radius(), id, test_mass);
   }
 
-  Particle _ParticleStore::operator[](size_t idx) { return Particle(idx, *this); }
-  const Particle _ParticleStore::operator[](size_t idx) const { return Particle(idx, const_cast<_ParticleStore&>(*this)); }
+  Particle ParticleStore::operator[](size_t idx) { return Particle(idx, *this); }
+  const Particle ParticleStore::operator[](size_t idx) const { return Particle(idx, const_cast<ParticleStore&>(*this)); }
 
   namespace {
     template <typename T>
@@ -271,42 +271,42 @@ namespace rebound {
     }
   }
 
-  void _ParticleStore::reserve_double_ex_params(const std::vector<std::string> &names) {
+  void ParticleStore::reserve_double_ex_params(const std::vector<std::string> &names) {
     size_t N = size();
     for (const auto& name : names) reserve_ex_param(double_params, name, N);
   }
 
-  void _ParticleStore::reserve_int_ex_params(const std::vector<std::string> &names) {
+  void ParticleStore::reserve_int_ex_params(const std::vector<std::string> &names) {
     size_t N = size();
     for (const auto& name : names) reserve_ex_param(int_params, name, N);
   }
 
-  void _ParticleStore::reserve_hash_ex_params(const std::vector<std::string> &names) {
+  void ParticleStore::reserve_hash_ex_params(const std::vector<std::string> &names) {
     size_t N = size();
     for (const auto& name : names) reserve_ex_param(hash_params, name, N);
   }
 
-  void _ParticleStore::reserve_ptr_ex_params(const std::vector<std::string> &names) {
+  void ParticleStore::reserve_ptr_ex_params(const std::vector<std::string> &names) {
     size_t N = size();
     for (const auto& name : names) reserve_ex_param(ptr_params, name, N);
   }
 
-  void _ParticleStore::reserve_double_ex_param(const std::string &name) {
+  void ParticleStore::reserve_double_ex_param(const std::string &name) {
     size_t N = size();
     reserve_ex_param(double_params, name, N);
   }
 
-  void _ParticleStore::reserve_int_ex_param(const std::string &name) {
+  void ParticleStore::reserve_int_ex_param(const std::string &name) {
     size_t N = size();
     reserve_ex_param(int_params, name, N);
   }
 
-  void _ParticleStore::reserve_hash_ex_param(const std::string &name) {
+  void ParticleStore::reserve_hash_ex_param(const std::string &name) {
     size_t N = size();
     reserve_ex_param(hash_params, name, N);
   }
 
-  void _ParticleStore::reserve_ptr_ex_param(const std::string &name) {
+  void ParticleStore::reserve_ptr_ex_param(const std::string &name) {
     size_t N = size();
     reserve_ex_param(ptr_params, name, N);
   }

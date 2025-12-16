@@ -22,7 +22,7 @@
 namespace rebound {
   class Simulation;
   struct Vec3;
-  struct _ParticleStore;
+  struct ParticleStore;
 
   template <typename T1, typename T2>
   struct pair;
@@ -32,23 +32,23 @@ namespace rebound {
   struct Collision {
     size_t p1_i = 0;
     size_t p2_i = 0;
-    _ParticleStore* particles = nullptr;
+    ParticleStore* particles = nullptr;
 
-    Collision(size_t p1_i, size_t p2_i, _ParticleStore* particles)
+    Collision(size_t p1_i, size_t p2_i, ParticleStore* particles)
       : p1_i(p1_i), p2_i(p2_i), particles(particles) {}
   };
 
   class CollisionHandler {
   private:
-    static bool collision_direct(size_t i, size_t j, const _ParticleStore &particles);
-    static bool collision_line(size_t i, size_t j, const _ParticleStore &particles, std::vector<Vec3> prev_pos);
+    static bool collision_direct(size_t i, size_t j, const ParticleStore &particles);
+    static bool collision_line(size_t i, size_t j, const ParticleStore &particles, std::vector<Vec3> prev_pos);
   public:
     std::vector<Vec3> prev_pos{};
     CollisionDetection detect = CollisionDetection::NONE;
     pair<bool, std::vector<size_t>> (*handler)(const Collision &c) = nullptr;
     double eps = 0;
 
-    bool detect_collision(_ParticleStore &particles);
+    bool detect_collision(ParticleStore &particles);
   };
 
   namespace collision_handlers {

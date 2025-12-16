@@ -62,7 +62,7 @@ namespace rebound {
     infile.read(reinterpret_cast<char*>(&nparticles), sizeof(uint64_t));
     if (!infile) throw std::runtime_error("Failed reading particle data from file.");
 
-    particles = _ParticleStore(nparticles);
+    particles = ParticleStore(nparticles);
 
     particles.positions.resize(nparticles);
     particles.velocities.resize(nparticles);

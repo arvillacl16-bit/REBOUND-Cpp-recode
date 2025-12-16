@@ -29,7 +29,7 @@ namespace rebound {
   private:
     double t;
   public:
-    _ParticleStore particles;
+    ParticleStore particles;
     Integrator integrator;
     CollisionHandler coll_handler;
     double dt;

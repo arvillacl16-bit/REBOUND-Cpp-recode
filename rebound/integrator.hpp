@@ -39,23 +39,23 @@ namespace rebound {
   };
 
   namespace _accel {
-    void calc_accel_none(_ParticleStore& particles);
-    void calc_accel_basic(_ParticleStore& particles, double);
-    void calc_accel_jacobi(_ParticleStore& particles, double);
-    void calc_accel_compensated(_ParticleStore& particles, double);
-    void calc_accel_mercurius(_ParticleStore& particles, double, _MercuriusSettings settings);
+    void calc_accel_none(ParticleStore& particles);
+    void calc_accel_basic(ParticleStore& particles, double);
+    void calc_accel_jacobi(ParticleStore& particles, double);
+    void calc_accel_compensated(ParticleStore& particles, double);
+    void calc_accel_mercurius(ParticleStore& particles, double, _MercuriusSettings settings);
   }
 
   class Integrator {
   private:
-    void step_leapfrog_p1(_ParticleStore& particles, double dt) const;
-    void step_leapfrog_p2(_ParticleStore& particles, double dt) const;
-    void step_whfast_p1(_ParticleStore& particles, double dt) const;
-    void step_whfast_p2(_ParticleStore& particles, double dt) const;
-    void step_ias15_p1(_ParticleStore& particles, double dt) const;
-    void step_ias15_p2(_ParticleStore& particles, double dt) const;
-    void step_mercurius_p1(_ParticleStore& particles, double dt) const;
-    void step_mercurius_p2(_ParticleStore& particles, double dt) const;
+    void step_leapfrog_p1(ParticleStore& particles, double dt) const;
+    void step_leapfrog_p2(ParticleStore& particles, double dt) const;
+    void step_whfast_p1(ParticleStore& particles, double dt) const;
+    void step_whfast_p2(ParticleStore& particles, double dt) const;
+    void step_ias15_p1(ParticleStore& particles, double dt) const;
+    void step_ias15_p2(ParticleStore& particles, double dt) const;
+    void step_mercurius_p1(ParticleStore& particles, double dt) const;
+    void step_mercurius_p2(ParticleStore& particles, double dt) const;
   public:
     // double params
     double softening2 = 0;
@@ -72,6 +72,6 @@ namespace rebound {
     Integrator() {}
     Integrator(IntegratorMethod method_, double softening) : method(method_), softening2(softening * softening) {}
     
-    void step(_ParticleStore& particles, double dt);
+    void step(ParticleStore& particles, double dt);
   };
 }

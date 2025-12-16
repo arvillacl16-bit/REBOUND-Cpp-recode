@@ -20,24 +20,24 @@
 
 namespace rebound {
   namespace _transform {
-    void inertial_to_jacobi_posvel(const _ParticleStore& from, _ParticleStore& to);
-    void inertial_to_jacobi_posvelacc(const _ParticleStore& from, _ParticleStore& to);
-    void inertial_to_jacobi_acc(const _ParticleStore& from, _ParticleStore& to);
-    void jacobi_to_inertial_posvel(_ParticleStore& to, const _ParticleStore& from);
-    void jacobi_to_inertial_pos(_ParticleStore& to, const _ParticleStore& from);
-    void jacobi_to_inertial_acc(_ParticleStore& to, const _ParticleStore& from);
+    void inertial_to_jacobi_posvel(const ParticleStore& from, ParticleStore& to);
+    void inertial_to_jacobi_posvelacc(const ParticleStore& from, ParticleStore& to);
+    void inertial_to_jacobi_acc(const ParticleStore& from, ParticleStore& to);
+    void jacobi_to_inertial_posvel(ParticleStore& to, const ParticleStore& from);
+    void jacobi_to_inertial_pos(ParticleStore& to, const ParticleStore& from);
+    void jacobi_to_inertial_acc(ParticleStore& to, const ParticleStore& from);
 
-    void inertial_to_democraticheliocentric_posvel(const _ParticleStore& from, _ParticleStore& to);
-    void democraticheliocentric_to_inertial_pos(_ParticleStore& to, const _ParticleStore& from);
-    void democraticheliocentric_to_inertial_posvel(_ParticleStore& to, const _ParticleStore& from);
+    void inertial_to_democraticheliocentric_posvel(const ParticleStore& from, ParticleStore& to);
+    void democraticheliocentric_to_inertial_pos(ParticleStore& to, const ParticleStore& from);
+    void democraticheliocentric_to_inertial_posvel(ParticleStore& to, const ParticleStore& from);
 
-    void inertial_to_whds_posvel(const _ParticleStore& from, _ParticleStore& to);
-    void whds_to_inertial_pos(_ParticleStore& to, const _ParticleStore& from);
-    void whds_to_inertial_posvel(_ParticleStore& to, const _ParticleStore& from);
+    void inertial_to_whds_posvel(const ParticleStore& from, ParticleStore& to);
+    void whds_to_inertial_pos(ParticleStore& to, const ParticleStore& from);
+    void whds_to_inertial_posvel(ParticleStore& to, const ParticleStore& from);
 
-    void inertial_to_barycentric_posvel(const _ParticleStore& from, _ParticleStore& to);
-    void barycentric_to_inertial_pos(_ParticleStore& to, const _ParticleStore& from);
-    void barycentric_to_inertial_posvel(_ParticleStore& to, const _ParticleStore& from);
-    void barycentric_to_inertial_acc(_ParticleStore& to, const _ParticleStore& from);
+    void inertial_to_barycentric_posvel(const ParticleStore& from, ParticleStore& to);
+    void barycentric_to_inertial_pos(ParticleStore& to, const ParticleStore& from);
+    void barycentric_to_inertial_posvel(ParticleStore& to, const ParticleStore& from);
+    void barycentric_to_inertial_acc(ParticleStore& to, const ParticleStore& from);
   }
 }

@@ -20,7 +20,7 @@
 #include <iostream>
 
 namespace rebound {
-  void Integrator::step(_ParticleStore& particles, double dt) {
+  void Integrator::step(ParticleStore& particles, double dt) {
     if (gravity_method == GravityMethod::MERCURIUS && method != IntegratorMethod::MERCURIUS) {
       std::cerr << "You are using mercurius gravity with a non-mercurius integrator. This will lead to UB. Automatically switched to BASIC gravity.";
       gravity_method = GravityMethod::BASIC;

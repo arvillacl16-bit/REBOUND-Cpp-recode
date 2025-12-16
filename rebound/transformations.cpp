@@ -30,7 +30,7 @@ namespace rebound {
     // ------------------------------
     // Jacobi Transformations (serial -- data-dependent)
     // ------------------------------
-    void inertial_to_jacobi_posvel(const _ParticleStore& from, _ParticleStore& to) {
+    void inertial_to_jacobi_posvel(const ParticleStore& from, ParticleStore& to) {
       size_t N = from.size();
       double eta = from.mus[0];
       Vec3 s_pos = eta * from.positions[0];
@@ -55,7 +55,7 @@ namespace rebound {
       }
     }
 
-    void inertial_to_jacobi_posvelacc(const _ParticleStore& from, _ParticleStore& to) {
+    void inertial_to_jacobi_posvelacc(const ParticleStore& from, ParticleStore& to) {
       size_t N = from.size();
       double eta = from.mus[0];
       Vec3 s_pos = eta * from.positions[0];
@@ -81,7 +81,7 @@ namespace rebound {
       }
     }
 
-    void inertial_to_jacobi_acc(const _ParticleStore& from, _ParticleStore& to) {
+    void inertial_to_jacobi_acc(const ParticleStore& from, ParticleStore& to) {
       size_t N = from.size();
       double eta = from.mus[0];
       Vec3 s_acc = eta * from.accelerations[0];
@@ -100,7 +100,7 @@ namespace rebound {
       }
     }
 
-    void jacobi_to_inertial_posvel(_ParticleStore& to, const _ParticleStore& from) {
+    void jacobi_to_inertial_posvel(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
       double eta = from.mus[0];
       Vec3 s_pos = from.positions[0] * eta;
@@ -137,7 +137,7 @@ namespace rebound {
       }
     }
 
-    void jacobi_to_inertial_pos(_ParticleStore& to, const _ParticleStore& from) {
+    void jacobi_to_inertial_pos(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
       double eta = from.mus[0];
       Vec3 s_pos = from.positions[0] * eta;
@@ -164,7 +164,7 @@ namespace rebound {
       }
     }
 
-    void jacobi_to_inertial_acc(_ParticleStore& to, const _ParticleStore& from) {
+    void jacobi_to_inertial_acc(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
       double eta = from.mus[0];
       Vec3 s_acc = from.accelerations[0] * eta;
@@ -194,7 +194,7 @@ namespace rebound {
     // ------------------------------
     // Democratic Heliocentric Transformations (parallelizable)
     // ------------------------------
-    void inertial_to_democraticheliocentric_posvel(const _ParticleStore& from, _ParticleStore& to) {
+    void inertial_to_democraticheliocentric_posvel(const ParticleStore& from, ParticleStore& to) {
       size_t N = from.size();
 
       // component-wise accumulation for OpenMP reduction
@@ -237,7 +237,7 @@ namespace rebound {
       }
     }
 
-    void democraticheliocentric_to_inertial_pos(_ParticleStore& to, const _ParticleStore& from) {
+    void democraticheliocentric_to_inertial_pos(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
       double mtot = from.mus[0];
 
@@ -264,7 +264,7 @@ namespace rebound {
       }
     }
 
-    void democraticheliocentric_to_inertial_posvel(_ParticleStore& to, const _ParticleStore& from) {
+    void democraticheliocentric_to_inertial_posvel(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
       democraticheliocentric_to_inertial_pos(to, from);
 
@@ -295,7 +295,7 @@ namespace rebound {
     // ------------------------------
     // WHDS Transformations (partial parallelization)
     // ------------------------------
-    void inertial_to_whds_posvel(const _ParticleStore& from, _ParticleStore& to) {
+    void inertial_to_whds_posvel(const ParticleStore& from, ParticleStore& to) {
       size_t N = from.size();
 
       // compute center-of-mass quantities
@@ -348,12 +348,12 @@ namespace rebound {
       }
     }
 
-    void whds_to_inertial_pos(_ParticleStore& to, const _ParticleStore& from) {
+    void whds_to_inertial_pos(ParticleStore& to, const ParticleStore& from) {
       // same mapping as democraticheliocentric -> inertial pos
       democraticheliocentric_to_inertial_pos(to, from);
     }
 
-    void whds_to_inertial_posvel(_ParticleStore& to, const _ParticleStore& from) {
+    void whds_to_inertial_posvel(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
       democraticheliocentric_to_inertial_posvel(to, from);
 
@@ -389,7 +389,7 @@ namespace rebound {
     // ------------------------------
     // Barycentric Transformations (parallelizable)
     // ------------------------------
-    void barycentric_to_inertial_posvel(const _ParticleStore& from, _ParticleStore& to) {
+    void barycentric_to_inertial_posvel(const ParticleStore& from, ParticleStore& to) {
       size_t N = from.size();
 
       // initialize central scaled quantities
@@ -435,7 +435,7 @@ namespace rebound {
       }
     }
 
-    void barycentric_to_inertial_pos(_ParticleStore& to, const _ParticleStore& from) {
+    void barycentric_to_inertial_pos(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
       to.positions[0] = from.mus[0] * from.positions[0];
       to.mus[0] = from.mus[0];
@@ -468,7 +468,7 @@ namespace rebound {
       }
     }
 
-    void barycentric_to_inertial_acc(_ParticleStore& to, const _ParticleStore& from) {
+    void barycentric_to_inertial_acc(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
       to.accelerations[0] = from.mus[0] * from.accelerations[0];
       to.mus[0] = from.mus[0];
@@ -501,7 +501,7 @@ namespace rebound {
       }
     }
 
-    void inertial_to_barycentric_posvel(_ParticleStore& to, const _ParticleStore& from) {
+    void inertial_to_barycentric_posvel(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
 
       to.positions[0] = from.mus[0] * from.positions[0];
