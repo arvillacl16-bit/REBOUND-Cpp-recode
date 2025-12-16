@@ -38,7 +38,7 @@ namespace rebound {
       : p1_i(p1_i), p2_i(p2_i), particles(particles) {}
   };
 
-  struct CollisionHandler {
+  class CollisionHandler {
   private:
     std::vector<Vec3> prev_pos{};
 
