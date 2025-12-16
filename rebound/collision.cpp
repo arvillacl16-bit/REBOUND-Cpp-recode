@@ -25,7 +25,7 @@
 namespace rebound {
   bool CollisionHandler::collision_direct(size_t i, size_t j, const ParticleStore &particles) { return particles.positions[i].distance2(particles.positions[j]) < COMB_RAD2(i, j); }
 
-  bool CollisionHandler::collision_line(size_t i, size_t j, const ParticleStore &particles, std::vector<Vec3> prev_pos) {
+  bool CollisionHandler::collision_line(size_t i, size_t j, const ParticleStore &particles) {
     Vec3 a = prev_pos[j] - prev_pos[i];
     Vec3 d = a - (particles.positions[j] - particles.positions[i]);
 
@@ -52,7 +52,7 @@ namespace rebound {
       } else if (detect == CollisionDetection::LINE) {
         for (size_t i = 0; i < N; ++i) {
           for (size_t j = i + 1; j < N; ++j) {
-            if (collision_line(i, j, particles, prev_pos)) {
+            if (collision_line(i, j, particles)) {
               auto result = handler({i, j, &particles});
               if (result.first) val = true;
               indices.insert(result.second.begin(), result.second.end());

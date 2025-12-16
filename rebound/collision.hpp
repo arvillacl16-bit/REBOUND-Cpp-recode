@@ -40,8 +40,8 @@ namespace rebound {
 
   class CollisionHandler {
   private:
-    static bool collision_direct(size_t i, size_t j, const ParticleStore &particles);
-    static bool collision_line(size_t i, size_t j, const ParticleStore &particles, std::vector<Vec3> prev_pos);
+    bool collision_direct(size_t i, size_t j, const ParticleStore &particles);
+    bool collision_line(size_t i, size_t j, const ParticleStore &particles);
   public:
     std::vector<Vec3> prev_pos{};
     CollisionDetection detect = CollisionDetection::NONE;
