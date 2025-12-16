@@ -88,6 +88,5 @@ namespace rebound {
     if (!infile) throw std::runtime_error("Failed reading particle data from file.");
 
     infile.close();
-    prev_pos = std::vector<Vec3>();
   }
 }
