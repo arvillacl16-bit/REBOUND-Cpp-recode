@@ -4,4 +4,4 @@
 *.a
 test
 *.exe
-./reference
+/reference

@@ -262,7 +262,6 @@ namespace rebound {
   Particle _ParticleStore::operator[](size_t idx) { return Particle(idx, *this); }
   const Particle _ParticleStore::operator[](size_t idx) const { return Particle(idx, const_cast<_ParticleStore&>(*this)); }
 
-#ifdef USE_EXTRAS
   namespace {
     template <typename T>
     void reserve_ex_param(ExtParamMap<T>& map, const std::string& name, size_t N) {
@@ -311,5 +310,4 @@ namespace rebound {
     size_t N = size();
     reserve_ex_param(ptr_params, name, N);
   }
-#endif
 }

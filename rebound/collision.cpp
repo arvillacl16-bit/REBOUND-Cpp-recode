@@ -17,42 +17,75 @@
  */
 
 #include "rebound.hpp"
+#include <unordered_set>
 #include <algorithm>
 
 #define COMB_RAD2(i, j) (particles.radii[i] + particles.radii[j]) * (particles.radii[i] + particles.radii[j])
 
 namespace rebound {
-  bool Simulation::collision_direct(size_t i, size_t j) { return particles.positions[i].distance2(particles.positions[j]) < COMB_RAD2(i, j); }
+  bool CollisionHandler::collision_direct(size_t i, size_t j, const _ParticleStore &particles) { return particles.positions[i].distance2(particles.positions[j]) < COMB_RAD2(i, j); }
 
-  bool Simulation::collision_line(size_t i, size_t j) {
+  bool CollisionHandler::collision_line(size_t i, size_t j, const _ParticleStore &particles, std::vector<Vec3> prev_pos) {
     Vec3 a = prev_pos[j] - prev_pos[i];
     Vec3 d = a - (particles.positions[j] - particles.positions[i]);
 
     double t = a.dot(d) / d.mag2();
     Vec3 v = a - t * d;
-
     return v.mag2() < COMB_RAD2(i, j);
   }
 
+  bool CollisionHandler::detect_collision(_ParticleStore &particles) {
+    if (handler && (detect != CollisionDetection::NONE)) {
+      std::unordered_set<size_t> indices;
+      size_t N = particles.size();
+      bool val = false;
+      if (detect == CollisionDetection::DIRECT) {
+        for (size_t i = 0; i < N; ++i) {
+          for (size_t j = i + 1; j < N; ++j) {
+            if (collision_direct(i, j, particles)) {
+              auto result = handler({i, j, &particles});
+              if (result.first) val = true;
+              indices.insert(result.second.begin(), result.second.end());
+            }
+          }
+        }
+      } else if (detect == CollisionDetection::LINE) {
+        for (size_t i = 0; i < N; ++i) {
+          for (size_t j = i + 1; j < N; ++j) {
+            if (collision_line(i, j, particles, prev_pos)) {
+              auto result = handler({i, j, &particles});
+              if (result.first) val = true;
+              indices.insert(result.second.begin(), result.second.end());
+            }
+          }
+        }
+      }
+
+      for (size_t i = N; i-- > 0;) {
+        if (indices.find(i) != indices.end()) particles.remove_particle(i);
+      }
+    }
+    return false;
+  }
   namespace collision_handlers {
     pair<bool, std::vector<size_t>> merge(const Collision &c) {
       size_t i = c.p1_i;
       size_t j = c.p2_i;
-      Simulation &sim = *c.sim;
-      Vec3 pos_i = sim.particles[i].pos();
-      Vec3 pos_j = sim.particles[j].pos();
-      Vec3 vel_i = sim.particles[i].vel();
-      Vec3 vel_j = sim.particles[j].vel();
-      double m_i = sim.particles.mus[i];
-      double m_j = sim.particles.mus[j];
+      _ParticleStore &particles = *c.particles;
+      Vec3 pos_i = particles.positions[i];
+      Vec3 pos_j = particles.positions[j];
+      Vec3 vel_i = particles.velocities[i];
+      Vec3 vel_j = particles.velocities[j];
+      double m_i = particles.mus[i];
+      double m_j = particles.mus[j];
       double m_tot = m_i + m_j;
       if (m_i > m_j) {
-        sim.particles.velocities[i] = (m_i * vel_i + m_j * vel_j) / m_tot;
-        sim.particles.positions[i] = (m_i * pos_i + m_j * pos_j) / m_tot;
+        particles.velocities[i] = (m_i * vel_i + m_j * vel_j) / m_tot;
+        particles.positions[i] = (m_i * pos_i + m_j * pos_j) / m_tot;
         return {false, {j}};
       } else {
-        sim.particles.velocities[j] = (m_i * vel_i + m_j * vel_j) / m_tot;
-        sim.particles.positions[j] = (m_i * pos_i + m_j * pos_j) / m_tot;
+        particles.velocities[j] = (m_i * vel_i + m_j * vel_j) / m_tot;
+        particles.positions[j] = (m_i * pos_i + m_j * pos_j) / m_tot;
         return {false, {i}};
       }
     }

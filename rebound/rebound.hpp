@@ -27,29 +27,13 @@ namespace rebound {
 
   class Simulation {
   private:
-    std::vector<Vec3> prev_pos;
     double t;
-
-    bool collision_direct(size_t i, size_t j);
-    bool collision_line(size_t i, size_t j);
   public:
     _ParticleStore particles;
     Integrator integrator;
+    CollisionHandler coll_handler;
     double dt;
     bool (*heartbeat) (Simulation& sim) = nullptr; // If returns true, makes the integration terminate
-
-    struct {
-      double eps; // epsilon to avoid divide by zero
-      CollisionDetection method; // NONE = no detection, DIRECT = normal nxn detection, LINE = check along a line
-      pair<bool, std::vector<size_t>> (*handler)(const Collision& c) = nullptr;
-    } collision_settings;
-
-    struct {
-      BoundaryCondition condition;
-      double a = 0; // half
-      double b = 0; // For a rectanngle, half-side-length for the y-axis, for ellipsoid, y-axis half
-      double c = 0; // For a rectanngle, half-side-length for the z-axis, for ellipsoid, z-axis half
-    } boundary_settings;
 
     Simulation() {}
     explicit Simulation(std::string filename);

@@ -59,64 +59,13 @@ namespace rebound {
   bool Simulation::step(double dt_) {
     bool val = false;
 
-    prev_pos = particles.positions;
+    coll_handler.prev_pos = particles.positions;
     integrator.step(particles, dt_);
     t += dt_;
 
-    size_t N = n();
-    if (boundary_settings.condition == BoundaryCondition::OPEN) {
-      double a = boundary_settings.a;
-      double b = boundary_settings.b;
-      double c = boundary_settings.c;
+    val = coll_handler.detect_collision(particles);
 
-      for (size_t i = N; i >= 0; --i) {
-        Vec3 v = particles.positions[i];
-        if (v.x > a || v.x < -a || v.y > b || v.y < -b || v.z > c || v.z < -c) remove_particle(i);
-      }
-    } else if (boundary_settings.condition == BoundaryCondition::PERIODIC) {
-      double a = boundary_settings.a;
-      double b = boundary_settings.b;
-      double c = boundary_settings.c;
-
-      for (size_t i = 0; i < N; ++i) {
-        // not implemented yet
-      }
-    }
-
-    if (collision_settings.handler) {
-      size_t N = n();
-      std::unordered_set<size_t> indices{};
-      if (collision_settings.method == CollisionDetection::DIRECT) {
-        for (size_t i = 0; i < N; ++i) {
-          for (size_t j = i + 1; j < N; ++j) {
-            if (collision_direct(i, j)) {
-              auto result = collision_settings.handler({i, j, this});
-              if (result.first == true) val = true;
-              std::vector<size_t> indices_ = std::move(result.second);
-              indices.insert(indices_.begin(), indices_.end());
-            }
-          }
-        }
-      } else if (collision_settings.method == CollisionDetection::LINE) {
-        for (size_t i = 0; i < N; ++i) {
-          for (size_t j = i + 1; j < N; ++j) {
-            if (collision_line(i, j)) {
-              auto result = collision_settings.handler({i, j, this});
-              if (result.first) val = true;
-              std::vector<size_t> indices_ = std::move(result.second);
-              indices.insert(indices_.begin(), indices_.end());
-            }
-          }
-        }
-      }
-      for (size_t i = N; i-- > 0;) {
-        if (indices.find(i) != indices.end()) {
-          remove_particle(i);
-        }
-      }
-    }
-
-    if (heartbeat) val = true;
+    if (heartbeat(*this)) val = true;
     return val;
   }
 

@@ -21,7 +21,6 @@
 #include <cstdint>
 #include <vector>
 #include "extension_preprocessor.hpp"
-#define USE_EXTRAS
 
 using boollist = std::vector<uint8_t>;
 
@@ -37,11 +36,8 @@ namespace rebound {
     pair(const T1& first_, const T2& second_) : first(first_), second(second_) {}
   };
 
-#ifdef USE_EXTRAS
   template <typename T>
   using ExtParamMap = std::vector<pair<std::string, std::vector<T>>>;
-#endif
-
   struct _ParticleStore {
     std::vector<Vec3> positions;
     std::vector<Vec3> velocities;
@@ -54,7 +50,6 @@ namespace rebound {
 
     std::vector<uint32_t> versions;
 
-#ifdef USE_EXTRAS
     ExtParamMap<double> double_params;
     ExtParamMap<uint32_t> hash_params;
     ExtParamMap<int> int_params;
@@ -69,7 +64,6 @@ namespace rebound {
     void reserve_int_ex_param(const std::string &name);
     void reserve_hash_ex_param(const std::string &name);
     void reserve_ptr_ex_param(const std::string &name);
-#endif
 
     _ParticleStore(size_t capacity = 0);
 
