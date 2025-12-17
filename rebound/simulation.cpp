@@ -39,11 +39,13 @@ namespace rebound {
     ptr_hash->hash_map.clear();
     auto &parts = other.particles;
     for (size_t i = 0; i < parts.size(); ++i) add_particle(parts.positions[i], parts.velocities[i], parts.mus[i], parts.radii[i], parts.ids[i], parts.test_mass[i]);
+    return *this;
   }
 
   Simulation &Simulation::operator=(Simulation &&other) { 
     ptr_hash = other.ptr_hash;
     other.ptr_hash = nullptr; 
+    return *this;
   }
 
   Simulation::~Simulation() { delete ptr_hash; }

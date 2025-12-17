@@ -266,7 +266,7 @@ namespace rebound {
       auto p_j = settings.internals.p_jh;
       size_t N = particles.size();
       switch (settings.coordinates) {
-      case _WHFastSettings::Coordinates::JACOBI:
+      case _WHFastSettings::Coordinates::JACOBI: {
         _transform::inertial_to_jacobi_acc(particles, *p_j);
         double eta = particles.mus[0];
         for (size_t i = 1; i < N; ++i) {
@@ -284,10 +284,15 @@ namespace rebound {
           }
         }
         break;
-      case _WHFastSettings::Coordinates::DEMOCRATIC_HELIOCENTRIC:
+      } 
+      case _WHFastSettings::Coordinates::DEMOCRATIC_HELIOCENTRIC: {
         for (size_t i = 1; i < N; ++i) {
           if (!particles.test_mass[i]) p_j->velocities[i] += dt * p_j->accelerations[i];
         }
+        break;
+      }
+      default:
+        break;
       }
     }
   }
