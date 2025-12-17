@@ -148,7 +148,7 @@ namespace rebound {
     constexpr unsigned int WHFAST_NMAX_QUART = 64;
     constexpr unsigned int WHFAST_NMAX_NEWT = 32;
 
-    inline void kepler_solver(_WHFastSettings settings, ParticleStore& p_j, double M, size_t i, double dt) {
+    inline void kepler_solver(const _WHFastSettings &settings, ParticleStore& p_j, double M, size_t i, double dt) {
       Particle p1 = p_j[i];
 
       double r0 = p1.pos().mag();
@@ -261,5 +261,34 @@ namespace rebound {
       p_j[i].pos() += f * p1.pos() + g * p1.vel();
       p_j[i].vel() += fd * p1.pos() + gd * p1.vel();
     }
-  };
+
+    void interaction_step(ParticleStore &particles, double dt, double softening2, _WHFastSettings &settings, GravityMethod method) {
+      auto p_j = settings.internals.p_jh;
+      size_t N = particles.size();
+      switch (settings.coordinates) {
+      case _WHFastSettings::Coordinates::JACOBI:
+        _transform::inertial_to_jacobi_acc(particles, *p_j);
+        double eta = particles.mus[0];
+        for (size_t i = 1; i < N; ++i) {
+          Particle pji = (*p_j)[i];
+          if (!particles.test_mass[i]) eta += pji.mu();
+          p_j->velocities[i] += pji.acc() * dt;
+          if (method != GravityMethod::JACOBI) {
+            if (i > 1) {
+              double rj2i = 1. / (pji.pos().mag2() + softening2);
+              double rji = std::sqrt(rj2i);
+              double rj3iM = rji * rj2i * eta;
+              double prefac1 = dt * rj3iM;
+              p_j->velocities[i] += pji.pos();
+            }
+          }
+        }
+        break;
+      case _WHFastSettings::Coordinates::DEMOCRATIC_HELIOCENTRIC:
+        for (size_t i = 1; i < N; ++i) {
+          if (!particles.test_mass[i]) p_j->velocities[i] += dt * p_j->accelerations[i];
+        }
+      }
+    }
+  }
 }

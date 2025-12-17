@@ -28,6 +28,11 @@ namespace rebound {
   class Simulation {
   private:
     double t;
+
+    struct hashmap;
+    hashmap *ptr_hash;
+
+    size_t curr_idx = 0;
   public:
     ParticleStore particles;
     Integrator integrator;
@@ -35,10 +40,15 @@ namespace rebound {
     double dt;
     bool (*heartbeat) (Simulation& sim) = nullptr; // If returns true, makes the integration terminate
 
-    Simulation() {}
+    Simulation();
     explicit Simulation(std::string filename);
+    ~Simulation();
+    Simulation(const Simulation &sim);
+    Simulation(Simulation &&sim);
+    Simulation &operator=(const Simulation &sim);
+    Simulation &operator=(Simulation &&sim);
 
-    Particle add_particle(const Vec3& position, const Vec3& velocity, double mass, double radius, uint32_t id);
+    Particle add_particle(const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass);
     void remove_particle(size_t idx);
     void remove_particle(uint32_t id);
 
