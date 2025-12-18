@@ -43,7 +43,7 @@ namespace rebound {
     void calc_accel_basic(ParticleStore& particles, double);
     void calc_accel_jacobi(ParticleStore& particles, double);
     void calc_accel_compensated(ParticleStore& particles, double);
-    void calc_accel_mercurius(ParticleStore& particles, double, _MercuriusSettings settings);
+    void calc_accel_mercurius(ParticleStore& particles, double, MercuriusSettings settings);
   }
 
   class Integrator {
@@ -65,9 +65,9 @@ namespace rebound {
     GravityMethod gravity_method = GravityMethod::NONE;
 
     // Specific integrator settings
-    _WHFastSettings whfast_settings;
-    _MercuriusSettings mercurius_settings;
-    _IAS15Settings ias15_settings;
+    WHFastSettings whfast_settings;
+    MercuriusSettings mercurius_settings;
+    IAS15Settings ias15_settings;
 
     Integrator() {}
     Integrator(IntegratorMethod method_, double softening) : method(method_), softening2(softening * softening) {}

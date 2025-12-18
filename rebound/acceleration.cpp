@@ -151,8 +151,8 @@ namespace rebound {
         }
       }
 
-    void calc_accel_mercurius(ParticleStore& particles, double softening2, _MercuriusSettings settings) {
+    void calc_accel_mercurius(ParticleStore& particles, double softening2, MercuriusSettings settings) {
       calc_accel_basic(particles, softening2);
-      }
-    } // namespace _accel
-  } // namespace rebound
+    }
+  }
+}

@@ -161,6 +161,7 @@ namespace rebound {
   }
 
   double Orbit::M_to_E(double M, double e, double tol) {
+    if (e == 0) return M;
     double E = M;
     for (int i = 0; i < 100; ++i) {
       double f = E - e * std::sin(E) - M;

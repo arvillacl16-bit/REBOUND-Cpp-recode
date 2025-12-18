@@ -19,7 +19,7 @@
 #pragma once
 
 namespace rebound {
-  struct _WHFastSettings {
+  struct WHFastSettings {
     enum class Coordinates {
       JACOBI,
       DEMOCRATIC_HELIOCENTRIC,
@@ -52,11 +52,11 @@ namespace rebound {
     } internals;
   };
 
-  struct _IAS15Settings {
+  struct IAS15Settings {
     double precision = 1e-10;
   };
 
-  struct _MercuriusSettings {
+  struct MercuriusSettings {
     double r_crit_hill = 3.0;
   };
 }

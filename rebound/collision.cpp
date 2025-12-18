@@ -17,8 +17,9 @@
  */
 
 #include "rebound.hpp"
-#include <unordered_set>
+#include <set>
 #include <algorithm>
+
 
 #define COMB_RAD2(i, j) (particles.radii[i] + particles.radii[j]) * (particles.radii[i] + particles.radii[j])
 
@@ -35,10 +36,10 @@ namespace rebound {
   }
 
   bool CollisionHandler::detect_collision(ParticleStore &particles) {
+    bool val = false;
     if (handler && (detect != CollisionDetection::NONE)) {
-      std::unordered_set<size_t> indices;
+      std::set<size_t> indices;
       size_t N = particles.size();
-      bool val = false;
       if (detect == CollisionDetection::DIRECT) {
         for (size_t i = 0; i < N; ++i) {
           for (size_t j = i + 1; j < N; ++j) {
@@ -61,11 +62,11 @@ namespace rebound {
         }
       }
 
-      for (size_t i = N; i-- > 0;) {
-        if (indices.find(i) != indices.end()) particles.remove_particle(i);
+      for (auto it = indices.rbegin(); it != indices.rend(); ++it) {
+        particles.remove_particle(*it);
       }
     }
-    return false;
+    return val;
   }
   namespace collision_handlers {
     pair<bool, std::vector<size_t>> merge(const Collision &c) {
@@ -82,10 +83,12 @@ namespace rebound {
       if (m_i > m_j) {
         particles.velocities[i] = (m_i * vel_i + m_j * vel_j) / m_tot;
         particles.positions[i] = (m_i * pos_i + m_j * pos_j) / m_tot;
+        particles.mus[i] = m_tot;
         return {false, {j}};
       } else {
         particles.velocities[j] = (m_i * vel_i + m_j * vel_j) / m_tot;
         particles.positions[j] = (m_i * pos_i + m_j * pos_j) / m_tot;
+        particles.mus[j] = m_tot;
         return {false, {i}};
       }
     }
