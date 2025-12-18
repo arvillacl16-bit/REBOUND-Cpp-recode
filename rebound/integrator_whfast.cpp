@@ -312,5 +312,11 @@ namespace rebound {
       }
       }
     }
+
+    void jump_step(ParticleStore &particles, _WHFastSettings &settings, double dt) {
+      ParticleStore &p_h = *settings.internals.p_jh;
+      size_t N = particles.size();
+      double m0 = particles.mus[0];
+    }
   }
 }
