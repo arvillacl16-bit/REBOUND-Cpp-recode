@@ -349,5 +349,37 @@ namespace rebound {
           break;
       }
     }
+
+    void kepler_step(ParticleStore &particles, WHFastSettings &settings, double dt) {
+      double m0 = particles.mus[0];
+      ParticleStore &p_j = *settings.internals.p_jh;
+      double eta = m0;
+      size_t N = particles.size();
+      switch (settings.coordinates) {
+        case WHFastSettings::Coordinates::JACOBI: {
+#pragma omp parallel for
+          for (size_t i = 1; i < N; ++i) {
+            if (!particles.test_mass[i]) eta += p_j.mus[i];
+            kepler_solver(settings, p_j, eta, i, dt);
+          }
+          break;
+        } case WHFastSettings::Coordinates::DEMOCRATIC_HELIOCENTRIC: {
+#pragma omp parallel for
+          for (size_t i = 1; i < N; ++i) kepler_solver(settings, p_j, eta, i, dt);
+          break;
+        } case WHFastSettings::Coordinates::WHDS: {
+          for (size_t i = 1; i < N; ++i) {
+            if (particles.test_mass[i]) eta = m0;
+            else eta = m0 + p_j.mus[i];
+            kepler_solver(settings, p_j, eta, i, dt);
+          }
+          break;
+        } case WHFastSettings::Coordinates::BARYCENTRIC: {
+          eta = p_j.mus[0];
+          for (size_t i = 1; i < N; ++i) kepler_solver(settings, p_j, eta, i, dt);
+          break;
+        }
+      }
+    }
   }
 }
