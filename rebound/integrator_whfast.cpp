@@ -381,5 +381,19 @@ namespace rebound {
         }
       }
     }
+
+    void com_step(ParticleStore &p_j, double dt) {
+      p_j.positions[0] += dt * p_j.velocities[0];
+    }
+
+    void corrector_Z(ParticleStore &particles, WHFastSettings &settings, double a, double b) {
+      switch (settings.coordinates) {
+        case WHFastSettings::Coordinates::JACOBI: {
+          kepler_step(particles, settings, a);
+          _transform::jacobi_to_inertial_pos(particles, *settings.internals.p_jh);
+          break;
+        }
+      }
+    }
   }
 }
