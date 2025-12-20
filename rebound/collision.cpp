@@ -24,9 +24,13 @@
 #define COMB_RAD2(i, j) (particles.radii[i] + particles.radii[j]) * (particles.radii[i] + particles.radii[j])
 
 namespace rebound {
-  bool CollisionHandler::collision_direct(size_t i, size_t j, const ParticleStore &particles) { return particles.positions[i].distance2(particles.positions[j]) < COMB_RAD2(i, j); }
+  void remove_particles_by_set(const std::set<size_t> indices, ParticleStore &particles) {
+    for (auto it = indices.rbegin(); it != indices.rend(); ++it) particles.remove_particle(*it);
+  }
 
-  bool CollisionHandler::collision_line(size_t i, size_t j, const ParticleStore &particles) {
+  bool collision_direct(size_t i, size_t j, const ParticleStore &particles) { return particles.positions[i].distance2(particles.positions[j]) < COMB_RAD2(i, j); }
+
+  bool collision_line(size_t i, size_t j, const ParticleStore &particles, const std::vector<Vec3> &prev_pos) {
     Vec3 a = prev_pos[j] - prev_pos[i];
     Vec3 d = a - (particles.positions[j] - particles.positions[i]);
 
@@ -35,36 +39,42 @@ namespace rebound {
     return v.mag2() < COMB_RAD2(i, j);
   }
 
-  bool CollisionHandler::detect_collision(ParticleStore &particles) {
+  bool CollisionDirect::detect_collision(ParticleStore &particles) {
     bool val = false;
-    if (handler && (detect != CollisionDetection::NONE)) {
+    if (handler) {
       std::set<size_t> indices;
       size_t N = particles.size();
-      if (detect == CollisionDetection::DIRECT) {
-        for (size_t i = 0; i < N; ++i) {
-          for (size_t j = i + 1; j < N; ++j) {
-            if (collision_direct(i, j, particles)) {
-              auto result = handler({i, j, &particles});
-              if (result.first) val = true;
-              indices.insert(result.second.begin(), result.second.end());
-            }
-          }
-        }
-      } else if (detect == CollisionDetection::LINE) {
-        for (size_t i = 0; i < N; ++i) {
-          for (size_t j = i + 1; j < N; ++j) {
-            if (collision_line(i, j, particles)) {
-              auto result = handler({i, j, &particles});
-              if (result.first) val = true;
-              indices.insert(result.second.begin(), result.second.end());
-            }
+      for (size_t i = 0; i < N; ++i) {
+        for (size_t j = i + 1; j < N; ++j) {
+          if (collision_direct(i, j, particles)) {
+            auto result = handler({i, j, &particles});
+            if (result.first) val = true;
+            indices.insert(result.second.begin(), result.second.end());
           }
         }
       }
+      
+      remove_particles_by_set(indices, particles);
+    }
+    return val;
+  }
 
-      for (auto it = indices.rbegin(); it != indices.rend(); ++it) {
-        particles.remove_particle(*it);
+  bool CollisionLine::detect_collision(ParticleStore &particles) {
+    bool val = false;
+    if (handler) {
+      std::set<size_t> indices;
+      size_t N = particles.size();
+      for (size_t i = 0; i < N; ++i) {
+        for (size_t j = i + 1; j < N; ++j) {
+          if (collision_line(i, j, particles, prev_pos)) {
+            auto result = handler({i, j, &particles});
+            if (result.first) val = true;
+            indices.insert(result.second.begin(), result.second.end());
+          }
+        }
       }
+      
+      remove_particles_by_set(indices, particles);
     }
     return val;
   }

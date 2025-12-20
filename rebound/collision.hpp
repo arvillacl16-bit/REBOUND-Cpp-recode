@@ -39,16 +39,27 @@ namespace rebound {
   };
 
   class CollisionHandler {
-  private:
-    bool collision_direct(size_t i, size_t j, const ParticleStore &particles);
-    bool collision_line(size_t i, size_t j, const ParticleStore &particles);
   public:
     std::vector<Vec3> prev_pos{};
-    CollisionDetection detect = CollisionDetection::NONE;
     pair<bool, std::vector<size_t>> (*handler)(const Collision &c) = nullptr;
     double eps = 0;
 
+    virtual bool detect_collision(ParticleStore &particles) = 0;
+  };
+
+  class CollisionLine : public CollisionHandler {
+  public:
     bool detect_collision(ParticleStore &particles);
+  };
+
+  class CollisionDirect : public CollisionHandler {
+  public:
+    bool detect_collision(ParticleStore &particles);
+  };;
+
+  class CollisionNone : public CollisionHandler {
+  public:
+    inline bool detect_collision(ParticleStore &particles) { return false; }
   };
 
   namespace collision_handlers {

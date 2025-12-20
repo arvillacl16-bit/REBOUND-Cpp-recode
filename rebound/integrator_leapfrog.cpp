@@ -56,6 +56,7 @@ namespace rebound {
       _accel::calc_accel_jacobi(particles, softening2);
       break;
     default:
+      break;
     }
     step_p2(particles, dt);
   }
