@@ -17,16 +17,17 @@
  */
 
 #include "integrator.hpp"
+#include <iostream>
 
 namespace rebound {
-  void Integrator::step_leapfrog_p1(ParticleStore& particles, double dt) const {
+  void Leapfrog::step_p1(ParticleStore& particles, double dt) const {
     const size_t N = particles.size();
 
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) particles.positions[i] += dt / 2 * particles.velocities[i];
   }
 
-  void Integrator::step_leapfrog_p2(ParticleStore& particles, double dt) const {
+  void Leapfrog::step_p2(ParticleStore& particles, double dt) const {
     const size_t N = particles.size();
 
     double dt_half = dt / 2;
@@ -36,5 +37,26 @@ namespace rebound {
 
     #pragma omp parallel for
     for (size_t i = 0; i < N; ++i) particles.positions[i] += dt_half * particles.velocities[i];
+  }
+
+  void Leapfrog::step(ParticleStore &particles, double dt) {
+    if (gravity_method == GravityMethod::MERCURIUS) {
+      std::cerr << "Using MERCURIUS with a non-MERCURIUS integrator. Switching to BASIC" << std::endl;
+      gravity_method = GravityMethod::BASIC;
+    }
+    step_p1(particles, dt);
+    switch (gravity_method) {
+    case GravityMethod::BASIC:
+      _accel::calc_accel_basic(particles, softening2);
+      break;
+    case GravityMethod::COMPENSATED:
+      _accel::calc_accel_compensated(particles, softening2);
+      break;
+    case GravityMethod::JACOBI:
+      _accel::calc_accel_jacobi(particles, softening2);
+      break;
+    default:
+    }
+    step_p2(particles, dt);
   }
 }

@@ -20,6 +20,7 @@
 #include "particle.hpp"
 #include "integrator.hpp"
 #include "collision.hpp"
+#include "boundary.hpp"
 #include "transformations.hpp"
 
 namespace rebound {
@@ -35,8 +36,9 @@ namespace rebound {
     size_t curr_idx = 0;
   public:
     ParticleStore particles;
-    Integrator integrator;
-    CollisionHandler coll_handler;
+    Integrator *integrator;
+    CollisionHandler *coll_handler;
+    BoundaryHandler *bound_handler;
     double dt;
     bool (*heartbeat) (Simulation& sim) = nullptr; // If returns true, makes the integration terminate
 

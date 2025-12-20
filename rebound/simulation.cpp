@@ -28,7 +28,7 @@ namespace rebound {
   };
 
   Simulation::Simulation() : ptr_hash(new hashmap) {}
-  Simulation::Simulation(const Simulation &other) : ptr_hash(new hashmap) {
+  Simulation::Simulation(const Simulation &other) : ptr_hash(new hashmap), integrator(other.integrator), coll_handler(other.coll_handler) {
     auto &parts = other.particles;
     for (size_t i = 0; i < parts.size(); ++i) add_particle(parts.positions[i], parts.velocities[i], parts.mus[i], parts.radii[i], parts.ids[i], parts.test_mass[i]);
   }
@@ -51,14 +51,26 @@ namespace rebound {
   Simulation::~Simulation() { delete ptr_hash; }
 
   Particle Simulation::add_particle(const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass) {
-    ptr_hash->hash_map.emplace(id,++curr_idx);
+    ptr_hash->hash_map.emplace(id,curr_idx++);
     return particles.add_particle(position, velocity, mu, radius, id, test_mass);
   }
 
-  void Simulation::remove_particle(size_t idx) { particles.remove_particle(idx); }
+  void Simulation::remove_particle(size_t idx) {
+    if (idx >= n()) throw std::out_of_range("Index outside of simulation");
+    auto &hash_map = ptr_hash->hash_map;
+    size_t last_idx = n() - 1; 
+    uint32_t last_id = particles.ids[last_idx]; 
+    if (idx != last_idx) {
+      hash_map[last_id] = idx;
+      hash_map.erase(particles.ids[idx]);
+    } else hash_map.erase(last_id);
+    particles.remove_particle(idx);
+    --curr_idx;
+  }
 
   void Simulation::remove_particle(uint32_t id) {
-    if (auto it = ptr_hash->hash_map.find(id); it != ptr_hash->hash_map.end()) remove_particle(it->second);
+    auto &hash_map = ptr_hash->hash_map;
+    if (auto it = hash_map.find(id); it != hash_map.end()) remove_particle(it->second);
   }
 
   double Simulation::time() const { return t; }
@@ -82,11 +94,11 @@ namespace rebound {
   bool Simulation::step(double dt_) {
     bool val = false;
 
-    coll_handler.prev_pos = particles.positions;
-    integrator.step(particles, dt_);
+    coll_handler->prev_pos = particles.positions;
+    integrator->step(particles, dt_);
     t += dt_;
 
-    val = coll_handler.detect_collision(particles);
+    val = coll_handler->detect_collision(particles);
 
     if (heartbeat(*this)) val = true;
     return val;

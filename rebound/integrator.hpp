@@ -20,8 +20,6 @@
 #include "integrator_settings.hpp"
 
 namespace rebound {
-  class Simulation;
-
   enum class IntegratorMethod {
     LEAPFROG,
     WHFAST,
@@ -47,31 +45,48 @@ namespace rebound {
   }
 
   class Integrator {
-  private:
-    void step_leapfrog_p1(ParticleStore& particles, double dt) const;
-    void step_leapfrog_p2(ParticleStore& particles, double dt) const;
-    void step_whfast_p1(ParticleStore& particles, double dt) const;
-    void step_whfast_p2(ParticleStore& particles, double dt) const;
-    void step_ias15_p1(ParticleStore& particles, double dt) const;
-    void step_ias15_p2(ParticleStore& particles, double dt) const;
-    void step_mercurius_p1(ParticleStore& particles, double dt) const;
-    void step_mercurius_p2(ParticleStore& particles, double dt) const;
   public:
-    // double params
     double softening2 = 0;
-
-    // General integrator settings
-    IntegratorMethod method = IntegratorMethod::NONE;
-    GravityMethod gravity_method = GravityMethod::NONE;
-
-    // Specific integrator settings
-    WHFastSettings whfast_settings;
-    MercuriusSettings mercurius_settings;
-    IAS15Settings ias15_settings;
-
-    Integrator() {}
-    Integrator(IntegratorMethod method_, double softening) : method(method_), softening2(softening * softening) {}
+    GravityMethod gravity_method = GravityMethod::BASIC;
     
+    virtual void step(ParticleStore& particles, double dt) = 0;
+  };
+
+  class Leapfrog : public Integrator {
+  private:
+    void step_p1(ParticleStore& particles, double dt) const;
+    void step_p2(ParticleStore& particles, double dt) const;
+  public:
+    void step(ParticleStore& particles, double dt);
+  };
+
+  class WHFast : public Integrator {
+  private:
+    void step_p1(ParticleStore& particles, double dt) const;
+    void step_p2(ParticleStore& particles, double dt) const;
+  public:
+    WHFastSettings settings;
+
+    void step(ParticleStore& particles, double dt);
+  };
+
+  class IAS15 : public Integrator {
+  private:
+    void step_p1(ParticleStore& particles, double dt) const;
+    void step_p2(ParticleStore& particles, double dt) const;
+  public:
+    IAS15Settings settings;
+
+    void step(ParticleStore& particles, double dt);
+  };
+
+  class Mercurius : public Integrator {
+  private:
+    void step_p1(ParticleStore& particles, double dt) const;
+    void step_p2(ParticleStore& particles, double dt) const;
+  public:
+    MercuriusSettings settings;
+
     void step(ParticleStore& particles, double dt);
   };
 }
