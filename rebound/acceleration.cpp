@@ -25,10 +25,8 @@ namespace rebound {
     std::vector<Vec3> temp_acc_flat; // flattened: n_threads * N
 
     void reset_temp_acc(size_t N, int n_threads) {
-      temp_acc_flat.resize(n_threads * N, Vec3{});
-      #pragma omp parallel for
-      for (int i = 0; i < n_threads * N; ++i)
-        temp_acc_flat[i] = Vec3{};
+      if (temp_acc_flat.size() != n_threads * N) temp_acc_flat.assign(n_threads * N, Vec3{});
+      else std::fill(temp_acc_flat.begin(), temp_acc_flat.end(), Vec3{});
     }
 
     void calc_accel_none(ParticleStore& particles) {
