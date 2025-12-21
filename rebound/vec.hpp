@@ -81,6 +81,6 @@ namespace rebound {
 }
 
 #pragma omp declare reduction( \
-  vec3_plus : Vec3 : omp_out += omp_in ) \
-  initializer(omp_priv = Vec3{})
+  vec3_plus : rebound::Vec3 : omp_out += omp_in ) \
+  initializer(omp_priv = rebound::Vec3{})
 #endif
