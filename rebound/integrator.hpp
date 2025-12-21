@@ -41,7 +41,7 @@ namespace rebound {
     void calc_accel_basic(ParticleStore& particles, double);
     void calc_accel_jacobi(ParticleStore& particles, double);
     void calc_accel_compensated(ParticleStore& particles, double);
-    void calc_accel_mercurius(ParticleStore& particles, double, MercuriusSettings settings);
+    void calc_accel_mercurius(ParticleStore& particles, double, MercuriusSettings &settings);
   }
 
   class Integrator {

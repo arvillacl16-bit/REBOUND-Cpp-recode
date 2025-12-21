@@ -22,137 +22,150 @@
 
 namespace rebound {
   namespace _accel {
+    std::vector<Vec3> temp_acc_flat; // flattened: n_threads * N
+
+    void reset_temp_acc(size_t N, int n_threads) {
+      temp_acc_flat.resize(n_threads * N, Vec3{});
+      #pragma omp parallel for
+      for (int i = 0; i < n_threads * N; ++i)
+        temp_acc_flat[i] = Vec3{};
+    }
+
     void calc_accel_none(ParticleStore& particles) {
-      const size_t N = particles.size();
+      size_t N = particles.size();
 #pragma omp parallel for
-      for (size_t i = 0; i < N; ++i) {
-        particles.accelerations[i] = {};
-      }
+      for (size_t i = 0; i < N; ++i) particles.accelerations[i] = {};
     }
 
     void calc_accel_basic(ParticleStore& particles, double softening2) {
       const size_t N = particles.size();
 
-      // Zero accelerations
-#pragma omp parallel for
-      for (size_t i = 0; i < N; ++i) particles.accelerations[i] = Vec3{};
+      // Zero particle accelerations
+      #pragma omp parallel for
+      for (size_t i = 0; i < N; ++i)
+        particles.accelerations[i] = Vec3{};
 
       int n_threads = 1;
-#ifdef _OPENMP
+    #ifdef _OPENMP
       n_threads = omp_get_max_threads();
-#endif
+    #endif
 
-      // Thread-local accumulators
-      std::vector<std::vector<Vec3>> temp_acc(n_threads, std::vector<Vec3>(N, Vec3()));
+      // Reset flattened temp accumulator
+      reset_temp_acc(N, n_threads);
 
-#pragma omp parallel
+      #pragma omp parallel
       {
-      int tid = 0;
-#ifdef _OPENMP
-      tid = omp_get_thread_num();
-#endif
-#pragma omp for schedule(dynamic)
-      for (size_t i = 0; i < N; ++i) {
-        if (particles.test_mass[i]) continue; // skip test mass as source?
+        int tid = 0;
+  #ifdef _OPENMP
+        tid = omp_get_thread_num();
+  #endif
 
-        for (size_t j = i + 1; j < N; ++j) {
-          if (particles.test_mass[i] && particles.test_mass[j]) continue; // ignore both test masses
+        #pragma omp for schedule(static)
+        for (size_t i = 0; i < N; ++i) {
+          if (particles.test_mass[i]) continue;
 
-          Vec3 dx = particles.positions[j] - particles.positions[i];
-          double r2 = dx.mag2() + softening2;
-          double inv_r3 = 1.0 / (r2 * std::sqrt(r2));
+          for (size_t j = i + 1; j < N; ++j) {
+            if (particles.test_mass[i] && particles.test_mass[j]) continue;
 
-          Vec3 a_i = dx * particles.mus[j] * inv_r3;
-          Vec3 a_j = -dx * particles.mus[i] * inv_r3;
+            Vec3 dx = particles.positions[j] - particles.positions[i];
+            double r2 = dx.mag2() + softening2;
+            double inv_r3 = 1.0 / (r2 * std::sqrt(r2));
 
-          temp_acc[tid][i] += a_i;
-          temp_acc[tid][j] += a_j;
+            temp_acc_flat[tid * N + i] += dx * particles.mus[j] * inv_r3;
+            temp_acc_flat[tid * N + j] -= dx * particles.mus[i] * inv_r3;
           }
         }
       }
 
-      for (int t = 0; t < n_threads; ++t)
-        for (size_t i = 0; i < N; ++i)
-          particles.accelerations[i] += temp_acc[t][i];
+      // Reduce thread-local sums
+      #pragma omp parallel for
+      for (size_t i = 0; i < N; ++i) {
+        Vec3 acc{};
+        for (int t = 0; t < n_threads; ++t)
+          acc += temp_acc_flat[t * N + i];
+        particles.accelerations[i] += acc;
       }
+    }
 
     void calc_accel_jacobi(ParticleStore& particles, double softening2) {
       const size_t N = particles.size();
 
-#pragma omp parallel for
-      for (size_t i = 0; i < N; ++i) particles.accelerations[i] = Vec3{};
+      // Zero particle accelerations
+      #pragma omp parallel for
+      for (size_t i = 0; i < N; ++i)
+        particles.accelerations[i] = Vec3{};
 
       int n_threads = 1;
-#ifdef _OPENMP
+    #ifdef _OPENMP
       n_threads = omp_get_max_threads();
-#endif
+    #endif
 
-      std::vector<std::vector<Vec3>> temp_acc(n_threads, std::vector<Vec3>(N, Vec3{}));
+      // Reset flattened temp accumulator
+      reset_temp_acc(N, n_threads);
 
-#pragma omp parallel
+      #pragma omp parallel
       {
-      int tid = 0;
-#ifdef _OPENMP
-      tid = omp_get_thread_num();
-#endif
-#pragma omp for schedule(dynamic)
+            int tid = 0;
+    #ifdef _OPENMP
+            tid = omp_get_thread_num();
+    #endif
+
+          #pragma omp for schedule(static)
       for (size_t i = 1; i < N; ++i) {
-        for (size_t j = 0; j < i; ++j) {
-          if (particles.test_mass[i] && particles.test_mass[j]) continue; // ignore both test masses
+          for (size_t j = 0; j < i; ++j) {
+            if (particles.test_mass[i] && particles.test_mass[j]) continue;
 
-          Vec3 dx = particles.positions[j] - particles.positions[i];
-          double r2 = dx.mag2() + softening2;
-          double inv_r3 = 1.0 / (r2 * std::sqrt(r2));
+            Vec3 dx = particles.positions[j] - particles.positions[i];
+            double r2 = dx.mag2() + softening2;
+            double inv_r3 = 1.0 / (r2 * std::sqrt(r2));
 
-          Vec3 a_i = dx * particles.mus[j] * inv_r3;
-          Vec3 a_j = -dx * particles.mus[i] * inv_r3;
-
-          temp_acc[tid][i] += a_i;
-          temp_acc[tid][j] += a_j;
+            temp_acc_flat[tid * N + i] += dx * particles.mus[j] * inv_r3;
+            temp_acc_flat[tid * N + j] -= dx * particles.mus[i] * inv_r3;
           }
         }
       }
 
-      for (int t = 0; t < n_threads; ++t)
-        for (size_t i = 0; i < N; ++i)
-          particles.accelerations[i] += temp_acc[t][i];
+      // Reduce thread-local sums
+      #pragma omp parallel for
+      for (size_t i = 0; i < N; ++i) {
+        Vec3 acc{};
+        for (int t = 0; t < n_threads; ++t)
+          acc += temp_acc_flat[t * N + i];
+        particles.accelerations[i] += acc;
       }
+    }
 
-    void calc_accel_compensated(ParticleStore& particles, double softening2) {
-      const size_t N = particles.size();
+    void calc_accel_mercurius(ParticleStore &particles, double softening2, MercuriusSettings &settings) {
+      calc_accel_basic(particles, softening2);
+    }
 
-      if (particles.gravity_cs.size() < N)
-        particles.gravity_cs.resize(N, Vec3{ 0.0, 0.0, 0.0 });
+    void calc_accel_compensated(ParticleStore &particles, double softening2) {
+      size_t N = particles.size();
+      if (particles.gravity_cs.size() < N) particles.gravity_cs.resize(N, Vec3{});
 
-      auto& cs = particles.gravity_cs;
-
+      auto &cs = particles.gravity_cs;
+      auto &test_mass = particles.test_mass;
 #pragma omp parallel for
       for (size_t i = 0; i < N; ++i) {
-        particles.accelerations[i] = Vec3{ 0.0, 0.0, 0.0 };
-        cs[i] = Vec3{ 0.0, 0.0, 0.0 };
-        }
+        particles.accelerations[i] = {};
+        cs[i] = {};
+      }
 
-#pragma omp parallel for schedule(guided)
+#pragma omp parallel for (guided)
       for (size_t i = 0; i < N; ++i) {
         for (size_t j = 0; j < N; ++j) {
+          if (test_mass[j]) continue;
           if (i == j) continue;
-          if (particles.test_mass[j]) continue; // skip contribution from test-mass particles
-
           Vec3 dr = particles.positions[i] - particles.positions[j];
           double r2 = dr.mag2() + softening2;
-          double inv_r3 = 1.0 / (r2 * std::sqrt(r2));
+          double inv_r3 = 1. / (r2 * std::sqrt(r2));
           Vec3 delta = -particles.mus[j] * inv_r3 * dr;
-
           Vec3 y = delta - cs[i];
           Vec3 t = particles.accelerations[i] + y;
           cs[i] = (t - particles.accelerations[i]) - y;
           particles.accelerations[i] = t;
-          }
         }
       }
-
-    void calc_accel_mercurius(ParticleStore& particles, double softening2, MercuriusSettings settings) {
-      calc_accel_basic(particles, softening2);
     }
   }
 }
