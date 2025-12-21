@@ -40,7 +40,6 @@ namespace rebound {
 
   class CollisionHandler {
   public:
-    std::vector<Vec3> prev_pos{};
     pair<bool, std::vector<size_t>> (*handler)(const Collision &c) = nullptr;
     double eps = 0;
 
@@ -49,6 +48,8 @@ namespace rebound {
 
   class CollisionLine : public CollisionHandler {
   public:
+    std::vector<Vec3> prev_pos{};
+    
     bool detect_collision(ParticleStore &particles);
   };
 
