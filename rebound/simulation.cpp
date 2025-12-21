@@ -100,7 +100,7 @@ namespace rebound {
 
     val = coll_handler->detect_collision(particles);
 
-    if (heartbeat(*this)) val = true;
+    if (heartbeat) if (heartbeat(*this)) val = true;
     return val;
   }
 
