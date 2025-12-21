@@ -3,5 +3,6 @@
 *.obj
 *.a
 test
+test.cpp
 *.exe
 /reference

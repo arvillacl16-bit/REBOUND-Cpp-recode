@@ -47,11 +47,11 @@
 
 namespace rebound {
   struct Vec3 {
-    double x;
-    double y;
-    double z;
+    double x, y, z;
 
-    constexpr Vec3(double x_ = 0.0, double y_ = 0.0, double z_ = 0.0) : x(x_), y(y_), z(z_) {}
+    constexpr Vec3() : x(0), y(0), z(0) {}
+    constexpr explicit Vec3(double x_) : x(x_), y(0), z(0) {}
+    constexpr Vec3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
 
     constexpr Vec3 operator+(const Vec3& other) const { return {x + other.x, y + other.y, z + other.z}; }
     constexpr Vec3 operator-(const Vec3& other) const { return {x - other.x, y - other.y, z - other.z}; }
