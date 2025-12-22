@@ -28,12 +28,24 @@ namespace rebound {
   };
 
   Simulation::Simulation() : ptr_hash(new hashmap) {}
-  Simulation::Simulation(const Simulation &other) : ptr_hash(new hashmap), integrator(other.integrator), coll_handler(other.coll_handler) {
+  Simulation::Simulation(const Simulation &other)
+   : ptr_hash(new hashmap), integrator(nullptr), coll_handler(nullptr), bound_handler(nullptr), 
+     do_integration(false), do_collisions(false), do_boundaries(false) {
     auto &parts = other.particles;
     for (size_t i = 0; i < parts.size(); ++i) add_particle(parts.positions[i], parts.velocities[i], parts.mus[i], parts.radii[i], parts.ids[i], parts.test_mass[i]);
   }
 
-  Simulation::Simulation(Simulation &&other) : ptr_hash(other.ptr_hash), do_integration(other.do_integration), do_boundaries(other.do_boundaries), do_collisions(other.do_collisions) { other.ptr_hash = nullptr; }
+  Simulation::Simulation(Simulation &&other)
+   : ptr_hash(other.ptr_hash), do_integration(other.do_integration), do_boundaries(other.do_boundaries), do_collisions(other.do_collisions),
+     integrator(other.integrator), coll_handler(other.coll_handler), bound_handler(other.bound_handler) { 
+    other.ptr_hash = nullptr;
+    other.do_integration = false; 
+    other.do_boundaries = false;
+    other.do_collisions = false;
+    other.integrator = nullptr;
+    other.coll_handler = nullptr;
+    other.bound_handler = nullptr;
+  }
 
   Simulation &Simulation::operator=(const Simulation &other) {
     ptr_hash->hash_map.clear();
@@ -45,6 +57,13 @@ namespace rebound {
   Simulation &Simulation::operator=(Simulation &&other) { 
     ptr_hash = other.ptr_hash;
     other.ptr_hash = nullptr; 
+
+    do_integration = other.do_integration; other.do_integration = false;
+    do_collisions = other.do_collisions; other.do_collisions = false;
+    do_boundaries = other.do_boundaries; other.do_boundaries = false;
+    integrator = other.integrator; other.integrator = nullptr;
+    coll_handler = other.coll_handler; other.coll_handler = nullptr;
+    bound_handler = other.bound_handler; other.bound_handler = nullptr;
     return *this;
   }
 

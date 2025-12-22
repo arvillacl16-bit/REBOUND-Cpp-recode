@@ -357,11 +357,15 @@ namespace rebound {
       size_t N = particles.size();
       switch (settings.coordinates) {
         case WHFastSettings::Coordinates::JACOBI: {
-#pragma omp parallel for
+          size_t N = particles.size();
+          std::vector<double> etas(N);
+          double running_eta = p_j.mus[0];
           for (size_t i = 1; i < N; ++i) {
-            if (!particles.test_mass[i]) eta += p_j.mus[i];
-            kepler_solver(settings, p_j, eta, i, dt);
+            etas[i] = running_eta;
+            if (!particles.test_mass[i]) running_eta += p_j.mus[i];
           }
+#pragma omp parallel for reduction
+          for (size_t i = 1; i < N; ++i) kepler_solver(settings, p_j, etas[i], i, dt);
           break;
         } case WHFastSettings::Coordinates::DEMOCRATIC_HELIOCENTRIC: {
 #pragma omp parallel for
