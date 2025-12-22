@@ -4,8 +4,6 @@
 namespace rebound {
   struct ParticleStore;
   class BoundaryHandler {
-  private:
-    //
   public:
     struct {
       Vec3 center{};
@@ -15,5 +13,20 @@ namespace rebound {
     } boundary;
 
     virtual void handle_boundary(ParticleStore &particles) = 0;
+  };
+
+  class BoundaryOpen : public BoundaryHandler {
+  public:
+    void handle_boundary(ParticleStore &particles);
+  };
+
+  class BoundaryPeriodic : public BoundaryHandler {
+  public:
+    void handle_boundary(ParticleStore &particles);
+  };
+
+  class BoundaryShearPeriodic : public BoundaryHandler {
+  public:
+    void handle_boundary(ParticleStore &particles);
   };
 }

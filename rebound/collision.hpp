@@ -56,11 +56,6 @@ namespace rebound {
   class CollisionDirect : public CollisionHandler {
   public:
     bool detect_collision(ParticleStore &particles);
-  };;
-
-  class CollisionNone : public CollisionHandler {
-  public:
-    inline bool detect_collision(ParticleStore &particles) { return false; }
   };
 
   namespace collision_handlers {

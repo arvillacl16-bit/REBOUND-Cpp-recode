@@ -39,6 +39,11 @@ namespace rebound {
     Integrator *integrator;
     CollisionHandler *coll_handler;
     BoundaryHandler *bound_handler;
+
+    bool do_integration = true;
+    bool do_collisions = false;
+    bool do_boundaries = false;
+    
     double dt;
     bool (*heartbeat) (Simulation& sim) = nullptr; // If returns true, makes the integration terminate
 
