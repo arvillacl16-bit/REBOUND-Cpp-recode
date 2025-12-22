@@ -33,7 +33,7 @@ namespace rebound {
     for (size_t i = 0; i < parts.size(); ++i) add_particle(parts.positions[i], parts.velocities[i], parts.mus[i], parts.radii[i], parts.ids[i], parts.test_mass[i]);
   }
 
-  Simulation::Simulation(Simulation &&other) : ptr_hash(other.ptr_hash) { other.ptr_hash = nullptr; }
+  Simulation::Simulation(Simulation &&other) : ptr_hash(other.ptr_hash), do_integration(other.do_integration), do_boundaries(other.do_boundaries), do_collisions(other.do_collisions) { other.ptr_hash = nullptr; }
 
   Simulation &Simulation::operator=(const Simulation &other) {
     ptr_hash->hash_map.clear();

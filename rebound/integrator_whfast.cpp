@@ -268,19 +268,19 @@ namespace rebound {
       size_t N = particles.size();
       switch (settings.coordinates) {
         case WHFastSettings::Coordinates::JACOBI: {
-          _transform::inertial_to_jacobi_acc(particles, *p_j);
+          _transform::inertial_to_jacobi_acc(particles, p_j);
           double eta = m0;
           for (size_t i = 1; i < N; ++i) {
-            Particle pji = (*p_j)[i];
+            Particle pji = p_j[i];
             if (!particles.test_mass[i]) eta += pji.mu();
-            p_j->velocities[i] += pji.acc() * dt;
+            p_j.velocities[i] += pji.acc() * dt;
             if (method != GravityMethod::JACOBI) {
               if (i > 1) {
                 double rj2i = 1. / (pji.pos().mag2() + softening2);
                 double rji = std::sqrt(rj2i);
                 double rj3iM = rji * rj2i * eta;
                 double prefac1 = dt * rj3iM;
-                p_j->velocities[i] += pji.pos();
+                p_j.velocities[i] += pji.pos();
               }
             }
           }
@@ -288,7 +288,7 @@ namespace rebound {
         } case WHFastSettings::Coordinates::DEMOCRATIC_HELIOCENTRIC: {
   #pragma omp parallel for
           for (size_t i = 1; i < N; ++i) {
-            if (!particles.test_mass[i]) p_j->velocities[i] += dt * p_j->accelerations[i];
+            if (!particles.test_mass[i]) p_j.velocities[i] += dt * p_j.accelerations[i];
           }
           break;
         } case WHFastSettings::Coordinates::WHDS: {
@@ -296,16 +296,16 @@ namespace rebound {
           for (size_t i = 1; i < N; ++i) {
             if (!particles.test_mass[i]) {
               double mi = particles.mus[i];
-              p_j->velocities[i] += dt * (m0 + mi) * particles.accelerations[i] / m0;
-            } else p_j->velocities[i] += dt * particles.accelerations[i];
+              p_j.velocities[i] += dt * (m0 + mi) * particles.accelerations[i] / m0;
+            } else p_j.velocities[i] += dt * particles.accelerations[i];
           }
           break;
         } case WHFastSettings::Coordinates::BARYCENTRIC: {
           for (size_t i = 1; i < N; ++i) {
             if (!particles.test_mass[i]) {
-              double dr = p_j->positions[i].mag();
-              double prefac = p_j->mus[0] / (dr * dr * dr);
-              p_j->velocities[i] += dt * (prefac * p_j->positions[i] + p_j->accelerations[i]);
+              double dr = p_j.positions[i].mag();
+              double prefac = p_j.mus[0] / (dr * dr * dr);
+              p_j.velocities[i] += dt * (prefac * p_j.positions[i] + p_j.accelerations[i]);
             }
           }
           break;
@@ -314,7 +314,7 @@ namespace rebound {
     }
 
     void jump_step(ParticleStore &particles, WHFastSettings &settings, double dt) {
-      ParticleStore &p_h = *settings.internals.p_jh;
+      ParticleStore &p_h = settings.internals.p_jh;
       size_t N = particles.size();
       double m0 = particles.mus[0];
       switch (settings.coordinates) {
@@ -352,7 +352,7 @@ namespace rebound {
 
     void kepler_step(ParticleStore &particles, WHFastSettings &settings, double dt) {
       double m0 = particles.mus[0];
-      ParticleStore &p_j = *settings.internals.p_jh;
+      ParticleStore &p_j = settings.internals.p_jh;
       double eta = m0;
       size_t N = particles.size();
       switch (settings.coordinates) {
@@ -390,7 +390,7 @@ namespace rebound {
       switch (settings.coordinates) {
         case WHFastSettings::Coordinates::JACOBI: {
           kepler_step(particles, settings, a);
-          _transform::jacobi_to_inertial_pos(particles, *settings.internals.p_jh);
+          _transform::jacobi_to_inertial_pos(particles, settings.internals.p_jh);
           break;
         }
       }

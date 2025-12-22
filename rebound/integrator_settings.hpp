@@ -45,8 +45,8 @@ namespace rebound {
     bool keep_unsynchronized = false; // If true, continues from unsynchronized state after synchronization
 
     struct {
-      ParticleStore* p_jh;
-      ParticleStore* p_temp;
+      ParticleStore p_jh;
+      ParticleStore p_temp;
       bool is_synchronized;
       bool recalc_coords_not_synchronized_warning;
     } internals;
