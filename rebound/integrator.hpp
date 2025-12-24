@@ -17,7 +17,6 @@
  */
 
 #include "particle.hpp"
-#include "integrator_settings.hpp"
 
 namespace rebound {
   enum class IntegratorMethod {
@@ -41,7 +40,7 @@ namespace rebound {
     void calc_accel_basic(ParticleStore& particles, double);
     void calc_accel_jacobi(ParticleStore& particles, double);
     void calc_accel_compensated(ParticleStore& particles, double);
-    void calc_accel_mercurius(ParticleStore& particles, double, MercuriusSettings &settings);
+    void calc_accel_mercurius(ParticleStore& particles, double, Mercurius &settings);
   }
 
   class Integrator {
@@ -65,7 +64,25 @@ namespace rebound {
     void step_p1(ParticleStore& particles, double dt) const;
     void step_p2(ParticleStore& particles, double dt) const;
   public:
-    WHFastSettings settings;
+    enum class Coordinates { JACOBI, DEMOCRATIC_HELIOCENTRIC, WHDS, BARYCENTRIC };
+    enum class Kernel { DEFAULT, MODIFIEDKICK, COMPOSITION, LAZY };
+    enum class Order { NONE, THIRD, FIFTH, ELEVENTH, SEVENTEENTH };
+
+    Coordinates coordinates = Coordinates::JACOBI;
+    Kernel kernal = Kernel::DEFAULT;
+    Order order = Order::NONE;
+
+    bool use_corrector_2 = false;
+    bool recalc_coords_this_timestep = false;
+    bool safe_mode = false;
+    bool keep_unsynchronized = false;
+
+    struct {
+      ParticleStore p_jh;
+      ParticleStore p_temp;
+      bool is_synchronized;
+      bool recalc_coords_not_synchronized_warning;
+    } internals;
 
     void step(ParticleStore& particles, double dt);
   };
@@ -75,7 +92,7 @@ namespace rebound {
     void step_p1(ParticleStore& particles, double dt) const;
     void step_p2(ParticleStore& particles, double dt) const;
   public:
-    IAS15Settings settings;
+    double precision = 1e-10;
 
     void step(ParticleStore& particles, double dt);
   };
@@ -85,7 +102,7 @@ namespace rebound {
     void step_p1(ParticleStore& particles, double dt) const;
     void step_p2(ParticleStore& particles, double dt) const;
   public:
-    MercuriusSettings settings;
+    double r_crit_hill = 3.0;
 
     void step(ParticleStore& particles, double dt);
   };

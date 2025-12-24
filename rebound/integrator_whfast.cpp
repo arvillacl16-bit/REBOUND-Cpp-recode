@@ -148,7 +148,7 @@ namespace rebound {
     constexpr unsigned int WHFAST_NMAX_QUART = 64;
     constexpr unsigned int WHFAST_NMAX_NEWT = 32;
 
-    inline void kepler_solver(const WHFastSettings &settings, ParticleStore& p_j, double M, size_t i, double dt) {
+    inline void kepler_solver(const WHFast &settings, ParticleStore& p_j, double M, size_t i, double dt) {
       Particle p1 = p_j[i];
 
       double r0 = p1.pos().mag();
@@ -262,12 +262,12 @@ namespace rebound {
       p_j[i].vel() += fd * p1.pos() + gd * p1.vel();
     }
 
-    void interaction_step(ParticleStore &particles, double dt, double softening2, WHFastSettings &settings, GravityMethod method) {
+    void interaction_step(ParticleStore &particles, double dt, double softening2, WHFast &settings, GravityMethod method) {
       auto p_j = settings.internals.p_jh;
       double m0 = particles.mus[0];
       size_t N = particles.size();
       switch (settings.coordinates) {
-        case WHFastSettings::Coordinates::JACOBI: {
+        case WHFast::Coordinates::JACOBI: {
           _transform::inertial_to_jacobi_acc(particles, p_j);
           double eta = m0;
           for (size_t i = 1; i < N; ++i) {
@@ -285,13 +285,13 @@ namespace rebound {
             }
           }
           break;
-        } case WHFastSettings::Coordinates::DEMOCRATIC_HELIOCENTRIC: {
+        } case WHFast::Coordinates::DEMOCRATIC_HELIOCENTRIC: {
   #pragma omp parallel for
           for (size_t i = 1; i < N; ++i) {
             if (!particles.test_mass[i]) p_j.velocities[i] += dt * p_j.accelerations[i];
           }
           break;
-        } case WHFastSettings::Coordinates::WHDS: {
+        } case WHFast::Coordinates::WHDS: {
   #pragma omp parallel for
           for (size_t i = 1; i < N; ++i) {
             if (!particles.test_mass[i]) {
@@ -300,7 +300,7 @@ namespace rebound {
             } else p_j.velocities[i] += dt * particles.accelerations[i];
           }
           break;
-        } case WHFastSettings::Coordinates::BARYCENTRIC: {
+        } case WHFast::Coordinates::BARYCENTRIC: {
           for (size_t i = 1; i < N; ++i) {
             if (!particles.test_mass[i]) {
               double dr = p_j.positions[i].mag();
@@ -313,12 +313,12 @@ namespace rebound {
       }
     }
 
-    void jump_step(ParticleStore &particles, WHFastSettings &settings, double dt) {
+    void jump_step(ParticleStore &particles, WHFast &settings, double dt) {
       ParticleStore &p_h = settings.internals.p_jh;
       size_t N = particles.size();
       double m0 = particles.mus[0];
       switch (settings.coordinates) {
-        case WHFastSettings::Coordinates::DEMOCRATIC_HELIOCENTRIC: {
+        case WHFast::Coordinates::DEMOCRATIC_HELIOCENTRIC: {
           Vec3 p;
 #pragma omp parallel for reduction (+:p)
           for (size_t i = 1; i < N; ++i) {
@@ -328,7 +328,7 @@ namespace rebound {
 #pragma omp parallel for reduction (+:p)
           for (size_t i = 1; i < N; ++i) p_h.positions[i] += dt * p / m0;
           break;
-        } case WHFastSettings::Coordinates::WHDS: {
+        } case WHFast::Coordinates::WHDS: {
           Vec3 p;
 #pragma omp parallel for reduction (+:p)
           for (size_t i = 1; i < N; ++i) {
@@ -350,13 +350,13 @@ namespace rebound {
       }
     }
 
-    void kepler_step(ParticleStore &particles, WHFastSettings &settings, double dt) {
+    void kepler_step(ParticleStore &particles, WHFast &settings, double dt) {
       double m0 = particles.mus[0];
       ParticleStore &p_j = settings.internals.p_jh;
       double eta = m0;
       size_t N = particles.size();
       switch (settings.coordinates) {
-        case WHFastSettings::Coordinates::JACOBI: {
+        case WHFast::Coordinates::JACOBI: {
           size_t N = particles.size();
           std::vector<double> etas(N);
           double running_eta = p_j.mus[0];
@@ -367,18 +367,18 @@ namespace rebound {
 #pragma omp parallel for reduction
           for (size_t i = 1; i < N; ++i) kepler_solver(settings, p_j, etas[i], i, dt);
           break;
-        } case WHFastSettings::Coordinates::DEMOCRATIC_HELIOCENTRIC: {
+        } case WHFast::Coordinates::DEMOCRATIC_HELIOCENTRIC: {
 #pragma omp parallel for
           for (size_t i = 1; i < N; ++i) kepler_solver(settings, p_j, eta, i, dt);
           break;
-        } case WHFastSettings::Coordinates::WHDS: {
+        } case WHFast::Coordinates::WHDS: {
           for (size_t i = 1; i < N; ++i) {
             if (particles.test_mass[i]) eta = m0;
             else eta = m0 + p_j.mus[i];
             kepler_solver(settings, p_j, eta, i, dt);
           }
           break;
-        } case WHFastSettings::Coordinates::BARYCENTRIC: {
+        } case WHFast::Coordinates::BARYCENTRIC: {
           eta = p_j.mus[0];
           for (size_t i = 1; i < N; ++i) kepler_solver(settings, p_j, eta, i, dt);
           break;
@@ -390,9 +390,9 @@ namespace rebound {
       p_j.positions[0] += dt * p_j.velocities[0];
     }
 
-    void corrector_Z(ParticleStore &particles, WHFastSettings &settings, double a, double b) {
+    void corrector_Z(ParticleStore &particles, WHFast &settings, double a, double b) {
       switch (settings.coordinates) {
-        case WHFastSettings::Coordinates::JACOBI: {
+        case WHFast::Coordinates::JACOBI: {
           kepler_step(particles, settings, a);
           _transform::jacobi_to_inertial_pos(particles, settings.internals.p_jh);
           break;
