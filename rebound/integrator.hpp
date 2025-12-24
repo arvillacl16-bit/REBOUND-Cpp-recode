@@ -35,6 +35,8 @@ namespace rebound {
     NONE
   };
 
+  class Mercurius;
+
   namespace _accel {
     void calc_accel_none(ParticleStore& particles);
     void calc_accel_basic(ParticleStore& particles, double);
