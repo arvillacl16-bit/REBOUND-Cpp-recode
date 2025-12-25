@@ -68,7 +68,7 @@ namespace rebound {
   public:
     enum class Coordinates { JACOBI, DEMOCRATIC_HELIOCENTRIC, WHDS, BARYCENTRIC };
     enum class Kernel { DEFAULT, MODIFIEDKICK, COMPOSITION, LAZY };
-    enum class Order { NONE, THIRD, FIFTH, ELEVENTH, SEVENTEENTH };
+    enum class Order { NONE, THIRD, FIFTH, SEVENTH, ELEVENTH, SEVENTEENTH };
 
     Coordinates coordinates = Coordinates::JACOBI;
     Kernel kernal = Kernel::DEFAULT;

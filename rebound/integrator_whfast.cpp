@@ -18,6 +18,7 @@
 
 #include "integrator.hpp"
 #include "transformations.hpp"
+#include <iostream>
 
 namespace rebound {
   namespace _whfast {
@@ -386,8 +387,25 @@ namespace rebound {
       }
     }
 
-    void com_step(ParticleStore &p_j, double dt) {
-      p_j.positions[0] += dt * p_j.velocities[0];
+    void com_step(ParticleStore &p_j, double dt) { p_j.positions[0] += dt * p_j.velocities[0]; }
+
+    void update_accel(ParticleStore &particles, GravityMethod method, double softening2) {
+      switch (method) {
+      case GravityMethod::BASIC:
+        _accel::calc_accel_basic(particles, softening2);
+        break;
+      case GravityMethod::COMPENSATED:
+        _accel::calc_accel_compensated(particles, softening2);
+        break;
+      case GravityMethod::JACOBI:
+        _accel::calc_accel_jacobi(particles, softening2);
+        break;
+      case GravityMethod::NONE:
+        _accel::calc_accel_none(particles);
+        break;
+      default:
+        break;
+      }
     }
 
     void corrector_Z(ParticleStore &particles, WHFast &settings, double a, double b) {
@@ -395,8 +413,85 @@ namespace rebound {
         case WHFast::Coordinates::JACOBI: {
           kepler_step(particles, settings, a);
           _transform::jacobi_to_inertial_pos(particles, settings.internals.p_jh);
+          update_accel(particles, settings.gravity_method, settings.softening2);
+          interaction_step(particles, -b, settings.softening2, settings, settings.gravity_method);
+          kepler_step(particles, settings, -a * 2);
+          _transform::jacobi_to_inertial_pos(particles, settings.internals.p_jh);
+          update_accel(particles, settings.gravity_method, settings.softening2);
+          interaction_step(particles, b, settings.softening2, settings, settings.gravity_method);
+          kepler_step(particles, settings, a);
+          break;
+        } case WHFast::Coordinates::BARYCENTRIC: {
+          kepler_step(particles, settings, a);
+          _transform::barycentric_to_inertial_pos(particles, settings.internals.p_jh);
+          update_accel(particles, settings.gravity_method, settings.softening2);
+          interaction_step(particles, -b, settings.softening2, settings, settings.gravity_method);
+          kepler_step(particles, settings, -a * 2);
+          _transform::barycentric_to_inertial_pos(particles, settings.internals.p_jh);
+          update_accel(particles, settings.gravity_method, settings.softening2);
+          interaction_step(particles, b, settings.softening2, settings, settings.gravity_method);
+          kepler_step(particles, settings, a);
           break;
         }
+        case WHFast::Coordinates::WHDS:
+        case WHFast::Coordinates::DEMOCRATIC_HELIOCENTRIC:
+          std::cerr << "Coordinate system not supported" << '\n';
+          break;
+      }
+    }
+
+    void apply_corrector(ParticleStore &particles, WHFast &settings, double inv, double dt) {
+      switch (settings.order) {
+        case WHFast::Order::THIRD: {
+          corrector_Z(particles, settings, corrector_a_1 * dt, -inv * corrector_b_31 * dt);
+          corrector_Z(particles, settings, -corrector_a_1 * dt, inv * corrector_b_31 * dt);
+          break;
+        } case WHFast::Order::FIFTH: {
+          corrector_Z(particles, settings, -corrector_a_2 * dt, -inv * corrector_b_51 * dt);
+          corrector_Z(particles, settings, -corrector_a_1 * dt, -inv * corrector_b_52 * dt);
+          corrector_Z(particles, settings, corrector_a_2 * dt, inv * corrector_b_51 * dt);
+          corrector_Z(particles, settings, corrector_a_1 * dt, inv * corrector_b_52 * dt);
+          break;
+        } case WHFast::Order::SEVENTH: {
+          corrector_Z(particles, settings, -corrector_a_3 * dt, -inv * corrector_b_71 * dt);
+          corrector_Z(particles, settings, -corrector_a_2 * dt, -inv * corrector_b_72 * dt);
+          corrector_Z(particles, settings, -corrector_a_1 * dt, -inv * corrector_b_73 * dt);
+          corrector_Z(particles, settings, corrector_a_3 * dt, inv * corrector_b_71 * dt);
+          corrector_Z(particles, settings, corrector_a_2 * dt, inv * corrector_b_72 * dt);
+          corrector_Z(particles, settings, corrector_a_1 * dt, inv * corrector_b_73 * dt);
+        } case WHFast::Order::ELEVENTH: {
+          corrector_Z(particles, settings, -corrector_a_5 * dt, -inv * corrector_b_111 * dt);
+          corrector_Z(particles, settings, -corrector_a_4 * dt, -inv * corrector_b_112 * dt);
+          corrector_Z(particles, settings, -corrector_a_3 * dt, -inv * corrector_b_113 * dt);
+          corrector_Z(particles, settings, -corrector_a_2 * dt, -inv * corrector_b_114 * dt);
+          corrector_Z(particles, settings, -corrector_a_1 * dt, -inv * corrector_b_115 * dt);
+          corrector_Z(particles, settings, corrector_a_5 * dt, inv * corrector_b_111 * dt);
+          corrector_Z(particles, settings, corrector_a_4 * dt, inv * corrector_b_112 * dt);
+          corrector_Z(particles, settings, corrector_a_3 * dt, inv * corrector_b_113 * dt);
+          corrector_Z(particles, settings, corrector_a_2 * dt, inv * corrector_b_114 * dt);
+          corrector_Z(particles, settings, corrector_a_1 * dt, inv * corrector_b_115 * dt);
+          break;
+        } case WHFast::Order::SEVENTEENTH: {
+          corrector_Z(particles, settings, -corrector_a_8 * dt, -inv * corrector_b_171 * dt);
+          corrector_Z(particles, settings, -corrector_a_7 * dt, -inv * corrector_b_172 * dt);
+          corrector_Z(particles, settings, -corrector_a_6 * dt, -inv * corrector_b_173 * dt);
+          corrector_Z(particles, settings, -corrector_a_5 * dt, -inv * corrector_b_174 * dt);
+          corrector_Z(particles, settings, -corrector_a_4 * dt, -inv * corrector_b_175 * dt);
+          corrector_Z(particles, settings, -corrector_a_3 * dt, -inv * corrector_b_176 * dt);
+          corrector_Z(particles, settings, -corrector_a_2 * dt, -inv * corrector_b_177 * dt);
+          corrector_Z(particles, settings, -corrector_a_1 * dt, -inv * corrector_b_178 * dt);
+          corrector_Z(particles, settings, corrector_a_8 * dt, inv * corrector_b_171 * dt);
+          corrector_Z(particles, settings, corrector_a_7 * dt, inv * corrector_b_172 * dt);
+          corrector_Z(particles, settings, corrector_a_6 * dt, inv * corrector_b_173 * dt);
+          corrector_Z(particles, settings, corrector_a_5 * dt, inv * corrector_b_174 * dt);
+          corrector_Z(particles, settings, corrector_a_4 * dt, inv * corrector_b_175 * dt);
+          corrector_Z(particles, settings, corrector_a_3 * dt, inv * corrector_b_176 * dt);
+          corrector_Z(particles, settings, corrector_a_2 * dt, inv * corrector_b_177 * dt);
+          corrector_Z(particles, settings, corrector_a_1 * dt, inv * corrector_b_178 * dt);
+          break;
+        }
+        default:
+          break;
       }
     }
   }
