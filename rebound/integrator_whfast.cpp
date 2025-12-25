@@ -494,5 +494,28 @@ namespace rebound {
           break;
       }
     }
+
+    void operator_C(ParticleStore &particles, WHFast &settings, double a, double b) {
+      kepler_step(particles, settings, a);
+      size_t N = particles.size();
+      _transform::jacobi_to_inertial_pos(particles, settings.internals.p_jh);
+      update_accel(particles, settings.gravity_method, settings.softening2);
+      interaction_step(particles, b, settings.softening2, settings, settings.gravity_method);
+      kepler_step(particles, settings, -a);
+    }
+
+    void operator_Y(ParticleStore &particles, WHFast &settings, double a, double b) {
+      operator_C(particles, settings, a, b);
+      operator_C(particles, settings, -a, -b);
+    }
+
+    void operator_U(ParticleStore &particles, WHFast &settings, double a, double b) {
+      kepler_step(particles, settings, a);
+      operator_Y(particles, settings, a, b);
+      operator_Y(particles, settings, a, -b);
+      kepler_step(particles, settings, -a);
+    }
+
+    void apply_corrector2() {}
   }
 }
