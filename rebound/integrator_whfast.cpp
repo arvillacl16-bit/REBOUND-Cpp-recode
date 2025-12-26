@@ -516,6 +516,11 @@ namespace rebound {
       kepler_step(particles, settings, -a);
     }
 
-    void apply_corrector2() {}
+    void apply_corrector2(ParticleStore &particles, WHFast &settings, double inv, double dt) {
+      double a = 0.5 * inv * dt;
+      double b = corrector2_b * inv * dt;
+      operator_U(particles, settings, a, b);
+      operator_U(particles, settings, -a, b);
+    }
   }
 }
