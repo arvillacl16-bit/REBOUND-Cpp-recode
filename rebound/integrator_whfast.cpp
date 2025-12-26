@@ -522,5 +522,55 @@ namespace rebound {
       operator_U(particles, settings, a, b);
       operator_U(particles, settings, -a, b);
     }
+
+    void calculate_jerk(ParticleStore &particles, WHFast &settings) {
+      size_t N = particles.size();
+      ParticleStore &jerk = settings.internals.p_jh;
+      Vec3 Rj{0, 0, 0};
+      double Mj = 0;
+      Vec3 Aj{0, 0, 0};
+      for (size_t j = 0; j < N; ++j) {
+        jerk.accelerations[j] = {0, 0, 0};
+        for (size_t i = 0; i < j + 1; ++i) {
+          if (j > 1) {
+            double dQkrj = Mj;
+            if (i < j) dQkrj = -particles.mus[j];
+            Vec3 Qk = particles.positions[j] - Rj / Mj;
+            Vec3 da = particles.accelerations[j] - Aj / Mj;
+
+            double dr2 = Qk.mag2();
+
+            double prefact2 = dQkrj / (dr2 * std::sqrt(dr2));
+
+            jerk.accelerations[i] += prefact2 * da;
+
+            double alphasum = da.dot(Qk);
+            double prefact1 = 3 * alphasum * prefact2 / dr2;
+            jerk.accelerations[i] -= prefact1 * Qk;
+          }
+
+          if (j != i && (i != 0 || j != 1)) {
+            Vec3 d = particles.positions[j] - particles.positions[i];
+            Vec3 da = particles.accelerations[j] - particles.accelerations[i];
+            
+            double dr2 = d.mag2();
+            double alphasum = da.dot(d);
+            double prefact2 = 1 / (dr2 * std::sqrt(dr2));
+            double prefact2i = prefact2 * particles.mus[i];
+            double prefact2j = prefact2 * particles.mus[j];
+            jerk.accelerations[j] -= da * prefact2i;
+            jerk.accelerations[i] += da * prefact2j;
+            double prefact1 = 3 * alphasum * prefact2 / dr2;
+            double prefact1i = particles.mus[i];
+            double prefact1j = particles.mus[j];
+            jerk.accelerations[j] += d * prefact1i;
+            jerk.accelerations[i] += d * prefact1j;
+          }
+        }
+        Aj += particles.accelerations[j] * particles.mus[j];
+        Rj += particles.positions[j] * particles.mus[j];
+        Mj += particles.mus[j];
+      }
+    }
   }
 }
