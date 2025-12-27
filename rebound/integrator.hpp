@@ -51,6 +51,8 @@ namespace rebound {
     GravityMethod gravity_method = GravityMethod::BASIC;
     
     virtual void step(ParticleStore& particles, double dt) = 0;
+    virtual void init();
+    virtual void reset();
   };
 
   class Leapfrog : public Integrator {
@@ -58,6 +60,8 @@ namespace rebound {
     void step_p1(ParticleStore& particles, double dt) const;
     void step_p2(ParticleStore& particles, double dt) const;
   public:
+    inline void init() {}
+    inline void reset() {}
     void step(ParticleStore& particles, double dt);
   };
 
@@ -65,6 +69,7 @@ namespace rebound {
   private:
     void step_p1(ParticleStore& particles, double dt) const;
     void step_p2(ParticleStore& particles, double dt) const;
+    void synchronize();
   public:
     enum class Coordinates { JACOBI, DEMOCRATIC_HELIOCENTRIC, WHDS, BARYCENTRIC };
     enum class Kernel { DEFAULT, MODIFIEDKICK, COMPOSITION, LAZY };
@@ -86,6 +91,8 @@ namespace rebound {
       bool recalc_coords_not_synchronized_warning;
     } internals;
 
+    void init();
+    void reset();
     void step(ParticleStore& particles, double dt);
   };
 
@@ -96,6 +103,8 @@ namespace rebound {
   public:
     double precision = 1e-10;
 
+    void init();
+    void reset();
     void step(ParticleStore& particles, double dt);
   };
 
@@ -106,6 +115,8 @@ namespace rebound {
   public:
     double r_crit_hill = 3.0;
 
+    void init();
+    void reset();
     void step(ParticleStore& particles, double dt);
   };
 }

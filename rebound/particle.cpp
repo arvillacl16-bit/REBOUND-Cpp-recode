@@ -135,24 +135,24 @@ namespace rebound {
     return store.accelerations[index];
   }
 
-  double Particle::mu() const {
+  const double &Particle::mu() const {
     assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.mus[index];
   }
 
-  double Particle::radius() const {
+  const double &Particle::radius() const {
     assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.radii[index];
   }
 
-  uint32_t Particle::id() const {
+  const uint32_t &Particle::id() const {
     assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.ids[index];
   }
 
-  bool Particle::get_test_mass() const {
+  const bool &Particle::get_test_mass() const {
     assert(store.versions[index] == version && "Particle handle is invalid!");
-    return store.test_mass[index];
+    return reinterpret_cast<const bool&>(store.test_mass[index]);
   }
 
   ind_Particle Particle::snap() const {

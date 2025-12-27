@@ -113,13 +113,12 @@ namespace rebound {
   bool Simulation::step(double dt_) {
     bool val = false;
 
-    if (do_collisions) if (CollisionLine *line_coll = dynamic_cast<CollisionLine*>(coll_handler)) line_coll->prev_pos = particles.positions;
-    if (do_integration) integrator->step(particles, dt_);
+    if (do_collisions && coll_handler) if (CollisionLine *line_coll = dynamic_cast<CollisionLine*>(coll_handler)) line_coll->prev_pos = particles.positions;
+    if (do_integration && integrator) integrator->step(particles, dt_);
     t += dt_;
 
-    if (do_collisions) val = coll_handler->detect_collision(particles);
-    if (do_boundaries) bound_handler->handle_boundary(particles);
-
+    if (do_collisions && coll_handler) val = coll_handler->detect_collision(particles);
+    if (do_boundaries && bound_handler) bound_handler->handle_boundary(particles);
     if (heartbeat && heartbeat(*this)) val = true;
     return val;
   }

@@ -24,8 +24,6 @@
 #include "transformations.hpp"
 
 namespace rebound {
-  enum class BoundaryCondition {NONE, OPEN, PERIODIC};
-
   class Simulation {
   private:
     double t;
@@ -36,9 +34,9 @@ namespace rebound {
     size_t curr_idx = 0;
   public:
     ParticleStore particles;
-    Integrator *integrator;
-    CollisionHandler *coll_handler;
-    BoundaryHandler *bound_handler;
+    Integrator *integrator = nullptr;
+    CollisionHandler *coll_handler = nullptr;
+    BoundaryHandler *bound_handler = nullptr;
 
     bool do_integration = true;
     bool do_collisions = false;
@@ -48,7 +46,7 @@ namespace rebound {
     bool (*heartbeat) (Simulation& sim) = nullptr; // If returns true, makes the integration terminate
 
     Simulation();
-    explicit Simulation(std::string filename);
+    explicit Simulation(const std::string &filename);
     ~Simulation();
     Simulation(const Simulation &sim);
     Simulation(Simulation &&sim);

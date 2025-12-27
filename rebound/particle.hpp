@@ -97,10 +97,10 @@ namespace rebound {
     const Vec3& pos() const;
     const Vec3& vel() const;
     const Vec3& acc() const;
-    double mu() const;
-    double radius() const;
-    uint32_t id() const;
-    bool get_test_mass() const;
+    const double &mu() const;
+    const double &radius() const;
+    const uint32_t &id() const;
+    const bool &get_test_mass() const;
 
     ind_Particle snap() const;
 

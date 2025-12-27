@@ -572,5 +572,5 @@ namespace rebound {
         Mj += particles.mus[j];
       }
     }
-  }
-}
+  } // end _whfast
+} // end rebound
