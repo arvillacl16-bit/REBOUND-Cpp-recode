@@ -92,6 +92,7 @@ namespace rebound {
     } internals;
 
     bool init(ParticleStore &particles);
+    void from_inertial(ParticleStore &particles);
     void reset();
     void step(ParticleStore& particles, double dt);
   };

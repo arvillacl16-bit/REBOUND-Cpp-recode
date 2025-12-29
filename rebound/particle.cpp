@@ -85,78 +85,63 @@ namespace rebound {
     : index(store_.size()), store(store_), version(0) { store.add_particle(position, velocity, mu, radius, id, test_mass_); }
 
   Vec3& Particle::pos() {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.positions[index];
   }
 
   Vec3& Particle::vel() {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.velocities[index];
   }
 
   Vec3& Particle::acc() {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.accelerations[index];
   }
 
   double& Particle::mu() {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.mus[index];
   }
 
   double& Particle::radius() {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.radii[index];
   }
 
   uint32_t& Particle::id() {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.ids[index];
   }
 
   void Particle::toggle_test_mass() {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     store.test_mass[index] = !store.test_mass[index];
   }
 
   // const versions
   const Vec3& Particle::pos() const {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.positions[index];
   }
 
   const Vec3& Particle::vel() const {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.velocities[index];
   }
 
   const Vec3& Particle::acc() const {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.accelerations[index];
   }
 
   const double &Particle::mu() const {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.mus[index];
   }
 
   const double &Particle::radius() const {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.radii[index];
   }
 
   const uint32_t &Particle::id() const {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return store.ids[index];
   }
 
   const bool &Particle::get_test_mass() const {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return reinterpret_cast<const bool&>(store.test_mass[index]);
   }
 
   ind_Particle Particle::snap() const {
-    assert(store.versions[index] == version && "Particle handle is invalid!");
     return ind_Particle(store.positions[index], store.velocities[index], store.mus[index], store.radii[index], store.ids[index], store.test_mass[index]);
   }
 

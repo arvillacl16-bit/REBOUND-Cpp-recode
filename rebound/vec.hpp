@@ -18,6 +18,8 @@
 
 #pragma once
 
+#define LOG(msg) std::cout << msg << std::endl
+
 #if !(defined(__cplusplus))
 #error "\n\
 ────────────────────────────────────────────────────────────────────\n\
