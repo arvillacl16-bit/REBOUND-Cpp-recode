@@ -573,4 +573,37 @@ namespace rebound {
       }
     }
   } // end _whfast
+
+  bool rebound::WHFast::init(ParticleStore &particles) {
+#ifdef _OPENMP
+    if (coordinates != WHFast::Coordinates::DEMOCRATIC_HELIOCENTRIC && coordinates != WHFast::Coordinates::WHDS) {
+      std::cerr << "OpenMP is only supported for Democratic Heliocentric and WHDS coordinates." << '\n';
+      return true;
+    }
+#endif
+    if (kernel != Kernel::DEFAULT && coordinates != Coordinates::JACOBI) {
+      std::cerr << "Non-standard kernel requires Jacobi coordinates.\n";
+      return true;
+    }
+
+    if (keep_unsynchronized && safe_mode) {
+      std::cerr << "Cannot use keep_unsynchronized with safe_mode.\n";
+      return true;
+    }
+
+    if (kernel == Kernel::MODIFIEDKICK || kernel == Kernel::LAZY) gravity_method = GravityMethod::JACOBI;
+
+    size_t N = particles.size();
+    if (particles.positions.capacity() != N) {
+      internals.p_jh.positions.reserve(N);
+      internals.p_jh.velocities.reserve(N);
+      internals.p_jh.accelerations.reserve(N);
+      internals.p_jh.mus.reserve(N);
+      internals.p_jh.test_mass.reserve(N);
+      internals.p_jh.ids.reserve(N);
+      internals.p_jh.versions.reserve(N);
+      recalc_coords_this_timestep = true;
+    }
+    return false;
+  }
 } // end rebound

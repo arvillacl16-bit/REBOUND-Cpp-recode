@@ -6,3 +6,4 @@ test
 test.cpp
 *.exe
 /reference
+/objfiles

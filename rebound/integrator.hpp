@@ -51,8 +51,8 @@ namespace rebound {
     GravityMethod gravity_method = GravityMethod::BASIC;
     
     virtual void step(ParticleStore& particles, double dt) = 0;
-    virtual void init();
-    virtual void reset();
+    virtual bool init(ParticleStore &particles) = 0;
+    virtual void reset() = 0;
   };
 
   class Leapfrog : public Integrator {
@@ -60,7 +60,7 @@ namespace rebound {
     void step_p1(ParticleStore& particles, double dt) const;
     void step_p2(ParticleStore& particles, double dt) const;
   public:
-    inline void init() {}
+    inline bool init(ParticleStore &particles) { return true; }
     inline void reset() {}
     void step(ParticleStore& particles, double dt);
   };
@@ -76,7 +76,7 @@ namespace rebound {
     enum class Order { NONE, THIRD, FIFTH, SEVENTH, ELEVENTH, SEVENTEENTH };
 
     Coordinates coordinates = Coordinates::JACOBI;
-    Kernel kernal = Kernel::DEFAULT;
+    Kernel kernel = Kernel::DEFAULT;
     Order order = Order::NONE;
 
     bool use_corrector_2 = false;
@@ -91,7 +91,7 @@ namespace rebound {
       bool recalc_coords_not_synchronized_warning;
     } internals;
 
-    void init();
+    bool init(ParticleStore &particles);
     void reset();
     void step(ParticleStore& particles, double dt);
   };
@@ -103,7 +103,7 @@ namespace rebound {
   public:
     double precision = 1e-10;
 
-    void init();
+    bool init(ParticleStore &particles);
     void reset();
     void step(ParticleStore& particles, double dt);
   };
@@ -115,7 +115,7 @@ namespace rebound {
   public:
     double r_crit_hill = 3.0;
 
-    void init();
+    bool init(ParticleStore &particles);
     void reset();
     void step(ParticleStore& particles, double dt);
   };
