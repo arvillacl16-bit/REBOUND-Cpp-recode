@@ -624,4 +624,22 @@ namespace rebound {
       break;
     }
   }
+
+  void WHFast::to_inertial(ParticleStore &particles) {
+    size_t N = particles.size();
+    switch (coordinates) {
+    case Coordinates::JACOBI:
+      _transform::jacobi_to_inertial_posvel(particles, internals.p_jh);
+      break;
+    case Coordinates::DEMOCRATIC_HELIOCENTRIC:
+      _transform::democraticheliocentric_to_inertial_posvel(particles, internals.p_jh);
+      break;
+    case Coordinates::WHDS:
+      _transform::whds_to_inertial_posvel(particles, internals.p_jh);
+      break;
+    case Coordinates::BARYCENTRIC:
+      _transform::barycentric_to_inertial_posvel(particles, internals.p_jh);
+      break;
+    }
+  }
 } // end rebound
