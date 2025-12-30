@@ -36,6 +36,8 @@ namespace rebound {
 
     Collision(size_t p1_i, size_t p2_i, ParticleStore* particles)
       : p1_i(p1_i), p2_i(p2_i), particles(particles) {}
+
+    virtual ~Collision() = default;
   };
 
   class CollisionHandler {

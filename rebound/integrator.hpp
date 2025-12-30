@@ -53,6 +53,8 @@ namespace rebound {
     virtual void step(ParticleStore& particles, double dt) = 0;
     virtual bool init(ParticleStore &particles) = 0;
     virtual void reset() = 0;
+
+    virtual ~Integrator() = default;
   };
 
   class Leapfrog : public Integrator {

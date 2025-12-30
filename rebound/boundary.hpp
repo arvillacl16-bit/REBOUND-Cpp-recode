@@ -13,6 +13,7 @@ namespace rebound {
     } boundary;
 
     virtual void handle_boundary(ParticleStore &particles) = 0;
+    virtual ~BoundaryHandler() = default;
   };
 
   class BoundaryOpen : public BoundaryHandler {
