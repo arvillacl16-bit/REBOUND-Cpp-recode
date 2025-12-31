@@ -806,4 +806,34 @@ namespace rebound {
     internals.is_synchronized = false;
     if (safe_mode) synchronize(particles, dt);
   }
+
+  void WHFast::reset() {
+    order = Order::NONE;
+    use_corrector_2 = false;
+    kernel = Kernel::DEFAULT;
+    coordinates = Coordinates::JACOBI;
+    internals.is_synchronized = true;
+    keep_unsynchronized = false;
+    safe_mode = true;
+    recalc_coords_this_timestep = false;
+    internals.recalc_coords_not_synchronized_warning = false;
+    if (internals.p_jh.size() > 0) {
+      internals.p_jh.positions.clear();
+      internals.p_jh.velocities.clear();
+      internals.p_jh.accelerations.clear();
+      internals.p_jh.mus.clear();
+      internals.p_jh.test_mass.clear();
+      internals.p_jh.ids.clear();
+      internals.p_jh.versions.clear();
+  }
+  if (internals.p_temp.size() > 0) {
+      internals.p_temp.positions.clear();
+      internals.p_temp.velocities.clear();
+      internals.p_temp.accelerations.clear();
+      internals.p_temp.mus.clear();
+      internals.p_temp.test_mass.clear();
+      internals.p_temp.ids.clear();
+      internals.p_temp.versions.clear();
+    }
+  }
 } // end rebound
