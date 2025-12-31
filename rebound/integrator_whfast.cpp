@@ -643,5 +643,101 @@ namespace rebound {
     }
   }
 
-  //
+  void WHFast::debug_operator_kepler(ParticleStore &particles, double dt) {
+    if (init(particles)) return;
+    from_inertial(particles);
+    _whfast::kepler_step(particles, *this, dt);
+    _whfast::com_step(internals.p_jh, dt);
+    to_inertial(particles);
+  }
+
+  void WHFast::debug_operator_interaction(ParticleStore &particles, double dt) {
+    if (init(particles)) return;
+    from_inertial(particles);
+    _whfast::update_accel(particles, gravity_method, softening2);
+    _whfast::interaction_step(particles, dt, softening2, *this, gravity_method);
+    to_inertial(particles);
+  }
+  
+  void WHFast::step_p1(ParticleStore &particles, double dt) {
+    size_t N = particles.size();
+    if (init(particles)) return;
+    if (safe_mode || recalc_coords_this_timestep) {
+      if (!internals.is_synchronized) {
+        synchronize(particles, dt);
+        if (!internals.recalc_coords_not_synchronized_warning) {
+          std::cerr << "Recalculating coordinates but pos/vel were not synchronized" << '\n';
+          internals.recalc_coords_not_synchronized_warning = true;
+        }
+      }
+      from_inertial(particles);
+      recalc_coords_this_timestep = false;
+    }
+    if (internals.is_synchronized) {
+      _whfast::apply_corrector(particles, *this, 1., dt);
+      if (use_corrector_2) _whfast::apply_corrector2(particles, *this, 1., dt);
+      switch (kernel) {
+      case Kernel::DEFAULT:
+      case Kernel::MODIFIEDKICK:
+      case Kernel::LAZY:
+        _whfast::kepler_step(particles, *this, 0.5 * dt);
+        _whfast::com_step(internals.p_jh, 0.5 * dt);
+        break;
+      case Kernel::COMPOSITION:
+        _whfast::kepler_step(particles, *this, 0.625 * dt);
+        _whfast::com_step(internals.p_jh, 0.625 * dt);
+        break;
+      default:
+        std::cerr << "WHFast kernel not implemented." << '\n';
+        return;
+      }
+    } else {
+      _whfast::kepler_step(particles, *this, dt);
+      _whfast::com_step(internals.p_jh, dt);
+    }
+
+    to_inertial(particles);
+  }
+
+  void WHFast::synchronize(ParticleStore &particles, double dt) {
+    size_t N = particles.size();
+    if (init(particles)) return;
+    if (!internals.is_synchronized) {
+      ParticleStore sync_pj;
+      if (keep_unsynchronized) {
+        for (size_t i = 0; i < N; ++i) {
+          sync_pj.positions.push_back(internals.p_jh.positions[i]);
+          sync_pj.velocities.push_back(internals.p_jh.velocities[i]);
+          sync_pj.accelerations.push_back(internals.p_jh.accelerations[i]);
+          sync_pj.mus.push_back(internals.p_jh.mus[i]);
+          sync_pj.test_mass.push_back(internals.p_jh.test_mass[i]);
+          sync_pj.ids.push_back(internals.p_jh.ids[i]);
+          sync_pj.versions.push_back(internals.p_jh.versions[i]);
+        }
+      }
+
+      switch (kernel) {
+      case Kernel::DEFAULT:
+      case Kernel::MODIFIEDKICK:
+      case Kernel::LAZY:
+        _whfast::kepler_step(particles, *this, -0.5 * dt);
+        _whfast::com_step(internals.p_jh, -0.5 * dt);
+        break;
+      case Kernel::COMPOSITION:
+        _whfast::kepler_step(particles, *this, 0.375 * dt);
+        _whfast::com_step(internals.p_jh, 0.375 * dt);
+        break;
+      default:
+        std::cerr << "WHFast kernel not implemented." << '\n';
+        return;
+      }
+      if (keep_unsynchronized) {
+        for (size_t i = 0; i < N; ++i) {
+          internals.p_jh.positions[i] = sync_pj.positions[i];
+          internals.p_jh.velocities[i] = sync_pj.velocities[i];
+          internals.p_jh.accelerations[i] = sync_pj.accelerations[i];
+        }
+      } else internals.is_synchronized = true;
+    }
+  }
 } // end rebound

@@ -69,9 +69,15 @@ namespace rebound {
 
   class WHFast : public Integrator {
   private:
-    void step_p1(ParticleStore& particles, double dt) const;
-    void step_p2(ParticleStore& particles, double dt) const;
-    void synchronize();
+    bool init(ParticleStore &particles);
+    void from_inertial(ParticleStore &particles);
+    void to_inertial(ParticleStore &particles);
+    void debug_operator_kepler(ParticleStore &particles, double dt);
+    void debug_operator_interaction(ParticleStore &particles, double dt);
+    void reset();
+    void step_p1(ParticleStore& particles, double dt);
+    void step_p2(ParticleStore& particles, double dt);
+    void synchronize(ParticleStore &particles, double dt);
   public:
     enum class Coordinates { JACOBI, DEMOCRATIC_HELIOCENTRIC, WHDS, BARYCENTRIC };
     enum class Kernel { DEFAULT, MODIFIEDKICK, COMPOSITION, LAZY };
@@ -92,11 +98,6 @@ namespace rebound {
       bool is_synchronized;
       bool recalc_coords_not_synchronized_warning;
     } internals;
-
-    bool init(ParticleStore &particles);
-    void from_inertial(ParticleStore &particles);
-    void to_inertial(ParticleStore &particles);
-    void reset();
     void step(ParticleStore& particles, double dt);
   };
 
