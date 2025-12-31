@@ -740,4 +740,70 @@ namespace rebound {
       } else internals.is_synchronized = true;
     }
   }
+
+  void WHFast::step_p2(ParticleStore &particles, double dt) {
+    size_t N = particles.size();
+    if (N == 0) return;
+    switch (kernel) {
+    case Kernel::DEFAULT:
+      _whfast::interaction_step(particles, dt, softening2, *this, gravity_method);
+      _whfast::jump_step(particles, *this, 0.5 * dt);
+      break;
+    case Kernel::MODIFIEDKICK:
+      _whfast::calculate_jerk(particles, *this);
+      for (size_t i = 0; i < N; ++i) {
+        double prefact = dt * dt / 12.;
+        particles.accelerations[i] += prefact * internals.p_jh.accelerations[i];
+      }
+      _whfast::interaction_step(particles, dt, softening2, *this, gravity_method);
+      break;
+    case Kernel::LAZY:
+      if (internals.p_temp.size() != N) {
+        internals.p_temp.positions.resize(N);
+        internals.p_temp.velocities.resize(N);
+        internals.p_temp.accelerations.resize(N);
+        internals.p_temp.mus.resize(N);
+        internals.p_temp.test_mass.resize(N);
+        internals.p_temp.ids.resize(N);
+        internals.p_temp.versions.resize(N);
+      }
+      _transform::inertial_to_jacobi_acc(particles, internals.p_temp);
+      internals.p_jh = internals.p_temp;
+      for (size_t i = 1; i < N; ++i) {
+        double prefac1 = dt * dt / 12.;
+        particles.positions[i] += prefac1 * internals.p_temp.accelerations[i];
+      }
+
+      _transform::jacobi_to_inertial_pos(particles, internals.p_jh);
+      _whfast::update_accel(particles, gravity_method, softening2);
+      _whfast::interaction_step(particles, dt, softening2, *this, gravity_method);
+      for (size_t i = 1; i < N; ++i) {
+        internals.p_jh.positions[i] = internals.p_temp.positions[i];
+      }
+      break;
+    case Kernel::COMPOSITION:
+      _whfast::interaction_step(particles, 1. / 6. * dt, softening2, *this, gravity_method);
+      _whfast::kepler_step(particles, *this, 0.25 * dt);
+      _whfast::com_step(internals.p_jh, 0.25 * dt);
+      _transform::jacobi_to_inertial_pos(particles, internals.p_jh);
+      _whfast::update_accel(particles, gravity_method, softening2);
+      _whfast::interaction_step(particles, 1. / 6. * dt, softening2, *this, gravity_method);
+      _whfast::kepler_step(particles, *this, 0.125 * dt);
+      _whfast::com_step(internals.p_jh, 0.125 * dt);
+      _transform::jacobi_to_inertial_pos(particles, internals.p_jh);
+      _whfast::update_accel(particles, gravity_method, softening2);
+      _whfast::interaction_step(particles, 1. / 6. * dt, softening2, *this, gravity_method);
+      _whfast::kepler_step(particles, *this, 0.25 * dt);
+      _whfast::com_step(internals.p_jh, 0.25 * dt);
+      _transform::jacobi_to_inertial_pos(particles, internals.p_jh);
+      _whfast::update_accel(particles, gravity_method, softening2);
+      _whfast::interaction_step(particles, dt * 1. / 6., softening2, *this, gravity_method);
+      break;
+    default:
+      return;
+    }
+
+    internals.is_synchronized = false;
+    if (safe_mode) synchronize(particles, dt);
+  }
 } // end rebound
