@@ -16,7 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "integrator.hpp"
+#include "../integrator.hpp"
 #include <iostream>
 
 namespace rebound {

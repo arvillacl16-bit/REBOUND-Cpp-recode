@@ -16,8 +16,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "integrator.hpp"
-#include "transformations.hpp"
+#include "../integrator.hpp"
+#include "../transformations.hpp"
 #include <iostream>
 #include <cassert>
 
