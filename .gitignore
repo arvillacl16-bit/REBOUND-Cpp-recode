@@ -1,4 +1,4 @@
-./.vscode
+/.vscode
 *.o
 *.obj
 *.a
@@ -7,3 +7,7 @@ test.cpp
 *.exe
 /reference
 /objfiles
+meson.build
+rebound/meson.build
+meson_options.txt
+/builddir

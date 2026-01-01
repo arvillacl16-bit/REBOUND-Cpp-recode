@@ -19,6 +19,7 @@
 #include "integrator.hpp"
 #include "transformations.hpp"
 #include <iostream>
+#include <cassert>
 
 namespace rebound {
   namespace _whfast {
@@ -264,7 +265,8 @@ namespace rebound {
     }
 
     void interaction_step(ParticleStore &particles, double dt, double softening2, WHFast &settings, GravityMethod method) {
-      auto p_j = settings.internals.p_jh;
+      LOG("Interaction step is being called");
+      auto &p_j = settings.internals.p_jh;
       double m0 = particles.mus[0];
       size_t N = particles.size();
       switch (settings.coordinates) {
@@ -594,14 +596,22 @@ namespace rebound {
     if (kernel == Kernel::MODIFIEDKICK || kernel == Kernel::LAZY) gravity_method = GravityMethod::JACOBI;
 
     size_t N = particles.size();
-    if (particles.positions.capacity() != N) {
-      internals.p_jh.positions.reserve(N);
-      internals.p_jh.velocities.reserve(N);
-      internals.p_jh.accelerations.reserve(N);
-      internals.p_jh.mus.reserve(N);
-      internals.p_jh.test_mass.reserve(N);
-      internals.p_jh.ids.reserve(N);
-      internals.p_jh.versions.reserve(N);
+    if (internals.p_jh.positions.capacity() != N) {
+      internals.p_jh.positions.resize(N);
+      internals.p_jh.velocities.resize(N);
+      internals.p_jh.accelerations.resize(N);
+      internals.p_jh.mus.resize(N);
+      internals.p_jh.test_mass.resize(N);
+      internals.p_jh.ids.resize(N);
+      internals.p_jh.versions.resize(N);
+
+      internals.p_jh.positions.assign(N, {0, 0, 0});
+      internals.p_jh.velocities.assign(N, {0, 0, 0});
+      internals.p_jh.accelerations.assign(N, {0, 0, 0});
+      internals.p_jh.mus.assign(N, 0.);
+      internals.p_jh.test_mass.assign(N, false);
+      internals.p_jh.ids.assign(N, 0);
+      internals.p_jh.versions.assign(N, 0);
       recalc_coords_this_timestep = true;
     }
     return false;
@@ -835,5 +845,12 @@ namespace rebound {
       internals.p_temp.ids.clear();
       internals.p_temp.versions.clear();
     }
+  }
+
+  void WHFast::step(ParticleStore &particles, double dt) {
+    synchronize(particles, dt);
+    step_p1(particles, dt);
+    step_p2(particles, dt);
+    synchronize(particles, dt);
   }
 } // end rebound

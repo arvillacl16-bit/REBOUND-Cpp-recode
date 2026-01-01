@@ -389,7 +389,7 @@ namespace rebound {
     // ------------------------------
     // Barycentric Transformations (parallelizable)
     // ------------------------------
-    void barycentric_to_inertial_posvel(const ParticleStore& from, ParticleStore& to) {
+    void barycentric_to_inertial_posvel(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
 
       // initialize central scaled quantities
@@ -501,7 +501,7 @@ namespace rebound {
       }
     }
 
-    void inertial_to_barycentric_posvel(ParticleStore& to, const ParticleStore& from) {
+    void inertial_to_barycentric_posvel(const ParticleStore& from, ParticleStore& to) {
       size_t N = from.size();
 
       to.positions[0] = from.mus[0] * from.positions[0];
