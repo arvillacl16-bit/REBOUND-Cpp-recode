@@ -19,10 +19,9 @@
 #pragma once
 #include "vec.hpp"
 #include <cstdint>
-#include <vector>
+#include "repstl/vector.hpp"
+#include "repstl/string.hpp"
 #include "extension_preprocessor.hpp"
-
-using boollist = std::vector<uint8_t>;
 
 namespace rebound {
   struct ind_Particle;
@@ -37,18 +36,18 @@ namespace rebound {
   };
 
   template <typename T>
-  using ExtParamMap = std::vector<pair<std::string, std::vector<T>>>;
+  using ExtParamMap = repstl::Vector<pair<repstl::String, repstl::Vector<T>>>;
   struct ParticleStore {
-    std::vector<Vec3> positions;
-    std::vector<Vec3> velocities;
-    std::vector<Vec3> accelerations;
-    std::vector<Vec3> gravity_cs;
-    std::vector<double> mus;
-    std::vector<double> radii;
-    std::vector<uint32_t> ids;
-    boollist test_mass;
+    repstl::Vector<Vec3> positions;
+    repstl::Vector<Vec3> velocities;
+    repstl::Vector<Vec3> accelerations;
+    repstl::Vector<Vec3> gravity_cs;
+    repstl::Vector<double> mus;
+    repstl::Vector<double> radii;
+    repstl::Vector<uint32_t> ids;
+    repstl::Vector<bool> test_mass;
 
-    std::vector<uint32_t> versions;
+    repstl::Vector<uint32_t> versions;
 
     ExtParamMap<double> double_params;
     ExtParamMap<uint32_t> hash_params;
@@ -75,6 +74,8 @@ namespace rebound {
 
     Particle operator[](size_t idx);
     const Particle operator[](size_t idx) const;
+
+    void print_if_nan_or_inf() const;
   };
 
   class Particle {

@@ -265,7 +265,6 @@ namespace rebound {
     }
 
     void interaction_step(ParticleStore &particles, double dt, double softening2, WHFast &settings, GravityMethod method) {
-      LOG("Interaction step is being called");
       auto &p_j = settings.internals.p_jh;
       double m0 = particles.mus[0];
       size_t N = particles.size();
@@ -597,21 +596,12 @@ namespace rebound {
 
     size_t N = particles.size();
     if (internals.p_jh.positions.capacity() != N) {
-      internals.p_jh.positions.resize(N);
-      internals.p_jh.velocities.resize(N);
-      internals.p_jh.accelerations.resize(N);
-      internals.p_jh.mus.resize(N);
-      internals.p_jh.test_mass.resize(N);
-      internals.p_jh.ids.resize(N);
-      internals.p_jh.versions.resize(N);
-
       internals.p_jh.positions.assign(N, {0, 0, 0});
       internals.p_jh.velocities.assign(N, {0, 0, 0});
       internals.p_jh.accelerations.assign(N, {0, 0, 0});
       internals.p_jh.mus.assign(N, 0.);
       internals.p_jh.test_mass.assign(N, false);
-      internals.p_jh.ids.assign(N, 0);
-      internals.p_jh.versions.assign(N, 0);
+      std::copy(particles.test_mass.begin(), particles.test_mass.end(), internals.p_jh.test_mass.begin());
       recalc_coords_this_timestep = true;
     }
     return false;
@@ -850,7 +840,9 @@ namespace rebound {
   void WHFast::step(ParticleStore &particles, double dt) {
     synchronize(particles, dt);
     step_p1(particles, dt);
+    // particles.print_if_nan_or_inf();
     step_p2(particles, dt);
+    // particles.print_if_nan_or_inf();
     synchronize(particles, dt);
   }
 } // end rebound

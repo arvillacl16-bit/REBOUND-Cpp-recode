@@ -17,6 +17,7 @@
  */
 
 #include "transformations.hpp"
+#include <iostream>
 
 namespace rebound {
   namespace _transform {
@@ -120,10 +121,12 @@ namespace rebound {
           eta -= mu;
           s_pos *= eta;
           s_vel *= eta;
+          to.print_if_nan_or_inf();
         } else {
           // test particle: simply copy
           to.positions[i] = from.positions[i];
           to.velocities[i] = from.velocities[i];
+          to.print_if_nan_or_inf();
         }
       }
 
@@ -132,8 +135,8 @@ namespace rebound {
         to.positions[0] = s_pos * mi;
         to.velocities[0] = s_vel * mi;
       } else {
-        to.positions[0] = Vec3(0.0,0.0,0.0);
-        to.velocities[0] = Vec3(0.0,0.0,0.0);
+        to.positions[0] = {};
+        to.velocities[0] = {};
       }
     }
 

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#define LOG(msg) std::cout << msg << std::endl
+#define LOG(msg) std::cerr << msg << '\n'
 
 #if !(defined(__cplusplus))
 #error "\n\
@@ -77,6 +77,11 @@ namespace rebound {
 
     constexpr bool operator==(const Vec3& other) const { return x == other.x && y == other.y && z == other.z; }
     constexpr bool operator!=(const Vec3& other) const { return !operator==(other); }
+
+    constexpr bool has_nan_or_inf() const {
+      return std::isnan(x) || std::isnan(y) || std::isnan(z) ||
+             std::isinf(x) || std::isinf(y) || std::isinf(z);
+    }
   };
 
   constexpr Vec3 operator*(double scalar, const Vec3& vec) { return vec * scalar; }

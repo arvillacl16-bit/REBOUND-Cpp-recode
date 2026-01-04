@@ -19,6 +19,7 @@
 #include "particle.hpp"
 #include <cassert>
 #include <cmath>
+#include <iostream>
 
 namespace rebound {
   ParticleStore::ParticleStore(size_t capacity) {
@@ -40,6 +41,15 @@ namespace rebound {
       if (!test_mass[i]) ++n;
     }
     return n;
+  }
+
+  void ParticleStore::print_if_nan_or_inf() const {
+    for (size_t i = 0; i < size(); ++i) {
+      if (positions[i].has_nan_or_inf() || velocities[i].has_nan_or_inf()) {
+        LOG("NaN or Inf detected in particle " << i);
+        return;
+      }
+    }
   }
 
   Particle ParticleStore::add_particle(const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass_) {
