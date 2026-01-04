@@ -62,7 +62,7 @@ namespace rebound {
   };
 
   namespace collision_handlers {
-    inline pair<bool, std::vector<size_t>> halt(const Collision &c) { return {true, {}}; }
-    pair<bool, std::vector<size_t>> merge(const Collision &c);
+    inline pair<bool, repstl::Vector<size_t>> halt(const Collision &c) { return {true, {}}; }
+    pair<bool, repstl::Vector<size_t>> merge(const Collision &c);
   }
 }

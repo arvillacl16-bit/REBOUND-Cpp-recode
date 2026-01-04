@@ -27,7 +27,7 @@ namespace rebound::repstl {
   private:
     T* data;
     size_t length;
-    size_t capacity;
+    size_t capacity_;
 
     void resize_(size_t new_capacity) {
       T* new_data = new T[new_capacity];
@@ -36,33 +36,33 @@ namespace rebound::repstl {
       }
       delete[] data;
       data = new_data;
-      capacity = new_capacity;
+      capacity_ = new_capacity;
     }
   public:
     using ThisVec = Vector<T>;
     using Iterator = T*;
     using ConstIterator = const T*;
 
-    Vector() : data(nullptr), length(0), capacity(0) {}
+    Vector() : data(nullptr), length(0), capacity_(0) {}
     Vector(const ThisVec& other) {
       length = other.length;
-      capacity = other.capacity;
-      data = new T[capacity];
+      capacity_ = other.capacity_;
+      data = new T[capacity_];
       for (size_t i = 0; i < length; ++i) {
         data[i] = other.data[i];
       }
     }
-    Vector(ThisVec&& other) noexcept : data(other.data), length(other.length), capacity(other.capacity) {
+    Vector(ThisVec&& other) noexcept : data(other.data), length(other.length), capacity_(other.capacity_) {
       other.data = nullptr;
       other.length = 0;
-      other.capacity = 0;
+      other.capacity_ = 0;
     }
     ThisVec& operator=(const ThisVec& other) {
       if (this != &other) {
         delete[] data;
         length = other.length;
-        capacity = other.capacity;
-        data = new T[capacity];
+        capacity_ = other.capacity_;
+        data = new T[capacity_];
         for (size_t i = 0; i < length; ++i) {
           data[i] = other.data[i];
         }
@@ -74,17 +74,17 @@ namespace rebound::repstl {
         delete[] data;
         data = other.data;
         length = other.length;
-        capacity = other.capacity;
+        capacity_ = other.capacity_;
         other.data = nullptr;
         other.length = 0;
-        other.capacity = 0;
+        other.capacity_ = 0;
       }
       return *this;
     }
 
     ~Vector() { delete[] data; }
 
-    Vector(std::initializer_list<T> init_list) : data(nullptr), length(0), capacity(0) {
+    Vector(std::initializer_list<T> init_list) : data(nullptr), length(0), capacity_(0) {
       reserve(init_list.size());
       for (const T& value : init_list) {
         push_back(value);
@@ -92,13 +92,13 @@ namespace rebound::repstl {
     }
 
     size_t size() const noexcept { return length; }
-    size_t capacity() const noexcept { return capacity; }
+    size_t capacity() const noexcept { return capacity_; }
     bool is_empty() const noexcept { return length == 0; }
     void clear() noexcept {
       delete[] data;
       data = nullptr;
       length = 0;
-      capacity = 0;
+      capacity_ = 0;
     }
 
     Iterator begin() noexcept { return data; }
@@ -107,8 +107,8 @@ namespace rebound::repstl {
     ConstIterator cend() const noexcept { return data + length; }
 
     void push_back(const T& value) {
-      if (length == capacity) {
-        resize_(capacity == 0 ? 1 : capacity * 2);
+      if (length == capacity_) {
+        resize_(capacity_ == 0 ? 1 : capacity_ * 2);
       }
       data[length++] = value;
     }
@@ -135,19 +135,19 @@ namespace rebound::repstl {
     }
 
     void reserve(size_t new_capacity) {
-      if (new_capacity > capacity) {
+      if (new_capacity > capacity_) {
         resize_(new_capacity);
       }
     }
 
     void shrink_to_fit() {
-      if (length < capacity) {
+      if (length < capacity_) {
         resize_(length);
       }
     }
 
     void resize(size_t new_size, const T& default_value = T()) {
-      if (new_size > capacity) {
+      if (new_size > capacity_) {
         resize_(new_size);
       }
       for (size_t i = length; i < new_size; ++i) {
@@ -157,7 +157,7 @@ namespace rebound::repstl {
     }
 
     void assign(size_t new_size, const T& value) {
-      if (new_size > capacity) {
+      if (new_size > capacity_) {
         resize_(new_size);
       }
       for (size_t i = 0; i < new_size; ++i) {

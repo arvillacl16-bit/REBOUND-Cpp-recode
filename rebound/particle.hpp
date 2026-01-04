@@ -32,6 +32,7 @@ namespace rebound {
     T1 first;
     T2 second;
 
+    pair() {}
     pair(const T1& first_, const T2& second_) : first(first_), second(second_) {}
   };
 
@@ -52,17 +53,14 @@ namespace rebound {
     ExtParamMap<double> double_params;
     ExtParamMap<uint32_t> hash_params;
     ExtParamMap<int> int_params;
-    ExtParamMap<void*> ptr_params;
 
-    void reserve_double_ex_params(const std::vector<std::string> &names);
-    void reserve_int_ex_params(const std::vector<std::string> &names);
-    void reserve_hash_ex_params(const std::vector<std::string> &names);
-    void reserve_ptr_ex_params(const std::vector<std::string> &names);
+    void reserve_double_ex_params(const repstl::Vector<repstl::String> &names);
+    void reserve_int_ex_params(const repstl::Vector<repstl::String> &names);
+    void reserve_hash_ex_params(const repstl::Vector<repstl::String> &names);
 
-    void reserve_double_ex_param(const std::string &name);
-    void reserve_int_ex_param(const std::string &name);
-    void reserve_hash_ex_param(const std::string &name);
-    void reserve_ptr_ex_param(const std::string &name);
+    void reserve_double_ex_param(const repstl::String &name);
+    void reserve_int_ex_param(const repstl::String &name);
+    void reserve_hash_ex_param(const repstl::String &name);
 
     ParticleStore(size_t capacity = 0);
 

@@ -260,50 +260,40 @@ namespace rebound {
 
   namespace {
     template <typename T>
-    void reserve_ex_param(ExtParamMap<T>& map, const std::string& name, size_t N) {
+    void reserve_ex_param(ExtParamMap<T>& map, const repstl::String& name, size_t N) {
       auto it = std::find_if(map.begin(), map.end(), 
-        [&name](const pair<std::string, std::vector<T>>& p) { return p.first == name; });
+        [&name](const pair<repstl::String, repstl::Vector<T>>& p) { return p.first == name; });
       if (it != map.end()) it->second.reserve(N);
     }
   }
 
-  void ParticleStore::reserve_double_ex_params(const std::vector<std::string> &names) {
+  void ParticleStore::reserve_double_ex_params(const repstl::Vector<repstl::String> &names) {
     size_t N = size();
-    for (const auto& name : names) reserve_ex_param(double_params, name, N);
+    for (auto it = names.cbegin(); it != names.cend(); ++it) reserve_ex_param(double_params, *it, N);
   }
 
-  void ParticleStore::reserve_int_ex_params(const std::vector<std::string> &names) {
+  void ParticleStore::reserve_int_ex_params(const repstl::Vector<repstl::String> &names) {
     size_t N = size();
-    for (const auto& name : names) reserve_ex_param(int_params, name, N);
+    for (auto it = names.cbegin(); it != names.cend(); ++it) reserve_ex_param(int_params, *it, N);
   }
 
-  void ParticleStore::reserve_hash_ex_params(const std::vector<std::string> &names) {
+  void ParticleStore::reserve_hash_ex_params(const repstl::Vector<repstl::String> &names) {
     size_t N = size();
-    for (const auto& name : names) reserve_ex_param(hash_params, name, N);
+    for (auto it = names.cbegin(); it != names.cend(); ++it) reserve_ex_param(hash_params, *it, N);
   }
 
-  void ParticleStore::reserve_ptr_ex_params(const std::vector<std::string> &names) {
-    size_t N = size();
-    for (const auto& name : names) reserve_ex_param(ptr_params, name, N);
-  }
-
-  void ParticleStore::reserve_double_ex_param(const std::string &name) {
+  void ParticleStore::reserve_double_ex_param(const repstl::String &name) {
     size_t N = size();
     reserve_ex_param(double_params, name, N);
   }
 
-  void ParticleStore::reserve_int_ex_param(const std::string &name) {
+  void ParticleStore::reserve_int_ex_param(const repstl::String &name) {
     size_t N = size();
     reserve_ex_param(int_params, name, N);
   }
 
-  void ParticleStore::reserve_hash_ex_param(const std::string &name) {
+  void ParticleStore::reserve_hash_ex_param(const repstl::String &name) {
     size_t N = size();
     reserve_ex_param(hash_params, name, N);
-  }
-
-  void ParticleStore::reserve_ptr_ex_param(const std::string &name) {
-    size_t N = size();
-    reserve_ex_param(ptr_params, name, N);
   }
 }

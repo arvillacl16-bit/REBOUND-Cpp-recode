@@ -149,5 +149,38 @@ namespace rebound::repstl {
     char* end() { return data + length; }
     const char* cbegin() const { return data; }
     const char* cend() const { return data + length; }
+
+    String operator+(const String& other) const {
+      String result;
+      result.length = length + other.length;
+      result.data = new char[result.length + 1];
+      if (data) std::strcpy(result.data, data);
+      if (other.data) std::strcpy(result.data + length, other.data);
+      return result;
+    }
+
+    String operator+(const char* str) const {
+      String result;
+      size_t str_len = std::strlen(str);
+      result.length = length + str_len;
+      result.data = new char[result.length + 1];
+      if (data) std::strcpy(result.data, data);
+      std::strcpy(result.data + length, str);
+      return result;
+    }
+
+    String& operator+=(const String& other) {
+      *this = *this + other;
+      return *this;
+    }
+
+    String& operator+=(const char* str) {
+      *this = *this + str;
+      return *this;
+    }
   };
+
+  inline String operator+(const char* lhs, const String& rhs) {
+    return rhs + lhs;
+  }
 }

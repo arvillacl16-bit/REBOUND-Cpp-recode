@@ -5,9 +5,11 @@
 namespace fs = std::filesystem;
 
 namespace rebound {
-  Simulation::Simulation(const std::string &filename) {
-    std::ifstream infile(filename, std::ios_base::binary);
-    if (!infile.is_open()) throw std::runtime_error("Could not open file: " + filename);
+  Simulation::Simulation(const repstl::String &filename) {
+    std::string fname(filename.len(), '\0');
+    for (size_t i = 0; i < filename.len(); ++i) fname += filename[i];
+    std::ifstream infile(fname, std::ios_base::binary);
+    if (!infile.is_open()) throw std::runtime_error(("Could not open file: " + filename).c_str());
     infile.read(reinterpret_cast<char*>(&t), sizeof(double));
     infile.read(reinterpret_cast<char*>(&dt), sizeof(double));
     size_t n_particles = 0;
@@ -28,12 +30,14 @@ namespace rebound {
     for (size_t i = 0; i < n_particles; ++i) infile.read(reinterpret_cast<char*>(&particles.versions[i]), sizeof(uint32_t));
   }
 
-  void Simulation::save(const std::string &filename) const {
-    if (fs::exists(filename)) throw std::runtime_error("File already exists: " + filename);
-    if (!fs::path(filename).has_parent_path()) {
-      fs::create_directories(fs::path(filename).parent_path());
+  void Simulation::save(const repstl::String &filename) const {
+    std::string fname(filename.len(), '\0');
+    for (size_t i = 0; i < filename.len(); ++i) fname += filename[i];
+    if (fs::exists(fname)) throw repstl::RuntimeError(("File already exists: " + filename).c_str());
+    if (!fs::path(fname).has_parent_path()) {
+      fs::create_directories(fs::path(fname).parent_path());
     }
-    std::ofstream outfile(filename, std::ios_base::binary);
+    std::ofstream outfile(fname, std::ios_base::binary);
     outfile.write(reinterpret_cast<const char*>(&t), sizeof(double));
     outfile.write(reinterpret_cast<const char*>(&dt), sizeof(double));
     for (size_t i = 0; i < particles.size(); ++i) outfile.write(reinterpret_cast<const char*>(&particles.mus[i]), sizeof(double));

@@ -46,7 +46,7 @@ namespace rebound {
     bool (*heartbeat) (Simulation& sim) = nullptr; // If returns true, makes the integration terminate
 
     Simulation();
-    explicit Simulation(const std::string &filename);
+    explicit Simulation(const repstl::String &filename);
     ~Simulation();
     Simulation(const Simulation &sim);
     Simulation(Simulation &&sim);
@@ -74,7 +74,7 @@ namespace rebound {
     bool step(double dt_);
     inline void steps(unsigned int N) { for (size_t i = 0; i < N; ++i) step(dt); }
 
-    void save(const std::string& filename) const;
+    void save(const repstl::String& filename) const;
 
     Vec3 com_pos();
     Vec3 com_vel();
