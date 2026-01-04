@@ -30,7 +30,7 @@ namespace rebound {
 
   bool collision_direct(size_t i, size_t j, const ParticleStore &particles) { return particles.positions[i].distance2(particles.positions[j]) < COMB_RAD2(i, j); }
 
-  bool collision_line(size_t i, size_t j, const ParticleStore &particles, const std::vector<Vec3> &prev_pos) {
+  bool collision_line(size_t i, size_t j, const ParticleStore &particles, const repstl::Vector<Vec3> &prev_pos) {
     Vec3 a = prev_pos[j] - prev_pos[i];
     Vec3 d = a - (particles.positions[j] - particles.positions[i]);
 
@@ -79,7 +79,7 @@ namespace rebound {
     return val;
   }
   namespace collision_handlers {
-    pair<bool, std::vector<size_t>> merge(const Collision &c) {
+    pair<bool, repstl::Vector<size_t>> merge(const Collision &c) {
       size_t i = c.p1_i;
       size_t j = c.p2_i;
       ParticleStore &particles = *c.particles;

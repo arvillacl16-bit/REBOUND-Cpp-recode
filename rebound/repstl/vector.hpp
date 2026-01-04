@@ -1,5 +1,25 @@
+/*
+ * This file is part of the C++ translation of REBOUND.
+ *
+ * Original REBOUND (C) code by Hanno Rein and others.
+ * This translation is licensed under the GNU General Public License v3 or later.
+ *
+ * REBOUND is free software: you can redistribute it and/or modify it under the terms
+ * of the GNU General Public License as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ *
+ * REBOUND is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #pragma once
 #include "exception.hpp"
+#include <initializer_list>
+#include <stddef.h>
 
 namespace rebound::repstl {
   template <typename T>
@@ -63,6 +83,13 @@ namespace rebound::repstl {
     }
 
     ~Vector() { delete[] data; }
+
+    Vector(std::initializer_list<T> init_list) : data(nullptr), length(0), capacity(0) {
+      reserve(init_list.size());
+      for (const T& value : init_list) {
+        push_back(value);
+      }
+    }
 
     size_t size() const noexcept { return length; }
     size_t capacity() const noexcept { return capacity; }

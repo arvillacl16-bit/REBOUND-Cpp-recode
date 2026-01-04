@@ -18,6 +18,7 @@
 
 #pragma once
 #include <cstddef>
+#include "repstl/vector.hpp"
 
 namespace rebound {
   class Simulation;
@@ -42,7 +43,7 @@ namespace rebound {
 
   class CollisionHandler {
   public:
-    pair<bool, std::vector<size_t>> (*handler)(const Collision &c) = nullptr;
+    pair<bool, repstl::Vector<size_t>> (*handler)(const Collision &c) = nullptr;
     double eps = 0;
 
     virtual bool detect_collision(ParticleStore &particles) = 0;
@@ -50,7 +51,7 @@ namespace rebound {
 
   class CollisionLine : public CollisionHandler {
   public:
-    std::vector<Vec3> prev_pos{};
+    repstl::Vector<Vec3> prev_pos{};
     
     bool detect_collision(ParticleStore &particles);
   };

@@ -124,8 +124,8 @@ namespace rebound {
   }
 
   Vec3 Simulation::com_pos() {
-    std::vector<Vec3> &positions = particles.positions;
-    std::vector<double> &mus = particles.mus;
+    repstl::Vector<Vec3> &positions = particles.positions;
+    repstl::Vector<double> &mus = particles.mus;
     if (positions.size() != n() || mus.size() != n()) return {};
 
     double total_mu = 0;
@@ -141,8 +141,8 @@ namespace rebound {
   }
 
   Vec3 Simulation::com_vel() {
-    std::vector<Vec3> &velocities = particles.velocities;
-    std::vector<double> &mus = particles.mus;
+    repstl::Vector<Vec3> &velocities = particles.velocities;
+    repstl::Vector<double> &mus = particles.mus;
     if (velocities.size() != n() || mus.size() != n()) return {};
 
     double total_mu = 0;

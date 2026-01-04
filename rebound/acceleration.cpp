@@ -17,16 +17,17 @@
  */
 
 #include "rebound.hpp"
-#include <vector>
 #include <cmath>
 
 namespace rebound {
   namespace _accel {
-    std::vector<Vec3> temp_acc_flat; // flattened: n_threads * N
+    repstl::Vector<Vec3> temp_acc_flat; // flattened: n_threads * N
 
     void reset_temp_acc(size_t N, int n_threads) {
       if (temp_acc_flat.size() != n_threads * N) temp_acc_flat.assign(n_threads * N, Vec3{});
-      else std::fill(temp_acc_flat.begin(), temp_acc_flat.end(), Vec3{});
+      else {
+        for (auto &v : temp_acc_flat) v = Vec3{};
+      }
     }
 
     void calc_accel_none(ParticleStore& particles) {
