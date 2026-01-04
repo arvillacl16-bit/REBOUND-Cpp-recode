@@ -19,6 +19,7 @@
 #pragma once
 
 #define LOG(msg) std::cerr << msg << '\n'
+#define LOG_NO_NEWLINE(msg) std::cerr << msg
 
 #if !(defined(__cplusplus))
 #error "\n\
@@ -49,10 +50,10 @@
 
 namespace rebound {
   struct Vec3 {
-    double x, y, z;
+    double x = 0, y = 0, z = 0;
 
-    constexpr Vec3() : x(0), y(0), z(0) {}
-    constexpr explicit Vec3(double x_) : x(x_), y(0), z(0) {}
+    constexpr Vec3() {}
+    constexpr explicit Vec3(double x_) : x(x_) {}
     constexpr Vec3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
 
     constexpr Vec3 operator+(const Vec3& other) const { return {x + other.x, y + other.y, z + other.z}; }
@@ -78,10 +79,12 @@ namespace rebound {
     constexpr bool operator==(const Vec3& other) const { return x == other.x && y == other.y && z == other.z; }
     constexpr bool operator!=(const Vec3& other) const { return !operator==(other); }
 
-    constexpr bool has_nan_or_inf() const {
+    bool has_nan_or_inf() const {
       return std::isnan(x) || std::isnan(y) || std::isnan(z) ||
              std::isinf(x) || std::isinf(y) || std::isinf(z);
     }
+
+    constexpr explicit operator bool() const { return !(!x && !y && !z); }
   };
 
   constexpr Vec3 operator*(double scalar, const Vec3& vec) { return vec * scalar; }
