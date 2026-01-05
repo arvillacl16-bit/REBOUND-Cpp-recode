@@ -62,65 +62,70 @@ namespace rebound {
     void set_particles(const ParticleStore &particles_);
 
     inline void set_integrator_none() { do_integration = false; }
-    inline void set_integrator_whfast() { 
+    inline WHFast &set_integrator_whfast() { 
       do_integration = true;
       delete integrator;
       integrator = new WHFast;
+      return (WHFast&)(*integrator);
     }
 
-    inline void set_integrator_leapfrog() { 
+    inline Leapfrog &set_integrator_leapfrog() { 
       do_integration = true;
       delete integrator;
       integrator = new Leapfrog;
+      return (Leapfrog&)(*integrator);
     }
 
-    inline void set_integrator_mercurius() { 
+    inline Mercurius &set_integrator_mercurius() { 
       do_integration = true;
       delete integrator;
       integrator = new Mercurius;
+      return (Mercurius&)(*integrator);
     }
 
-    inline void set_integrator_ias15() { 
+    inline IAS15 &set_integrator_ias15() { 
       do_integration = true;
       delete integrator;
       integrator = new IAS15;
+      return (IAS15&)(*integrator);
     }
 
     inline void set_collision_none() { do_collisions = false; }
-    inline void set_collision_direct() {
+    inline CollisionDirect &set_collision_direct() {
       do_collisions = true;
       delete coll_handler;
       coll_handler = new CollisionDirect;
+      return (CollisionDirect&)(*coll_handler);
     }
 
-    inline void set_collision_line() {
+    inline CollisionLine &set_collision_line() {
       do_collisions = true;
       delete coll_handler;
       coll_handler = new CollisionLine;
+      return (CollisionLine&)(*coll_handler);
     }
 
     inline void set_boundary_none() { do_boundaries = false; }
-    inline void set_boundary_open() {
+    inline BoundaryOpen &set_boundary_open() {
       do_boundaries = true;
       delete bound_handler;
       bound_handler = new BoundaryOpen;
+      return (BoundaryOpen&)(*bound_handler);
     }
 
-    inline void set_boundary_periodic() {
+    inline BoundaryPeriodic &set_boundary_periodic() {
       do_boundaries = true;
       delete bound_handler;
       bound_handler = new BoundaryPeriodic;
+      return (BoundaryPeriodic&)(*bound_handler);
     }
 
-    inline void set_boundary_shear_periodic() {
+    inline BoundaryShearPeriodic &set_boundary_shear_periodic() {
       do_boundaries = true;
       delete bound_handler;
       bound_handler = new BoundaryShearPeriodic;
+      return (BoundaryShearPeriodic&)(*bound_handler);
     }
-
-    inline Integrator* get_integrator() { return integrator; }
-    inline CollisionHandler* get_coll_handler() { return coll_handler; }
-    inline BoundaryHandler* get_bound_handler() { return bound_handler; }
 
     inline size_t n() const { return particles.size(); }
     inline size_t n_real() const {

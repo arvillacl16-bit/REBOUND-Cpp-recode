@@ -24,19 +24,22 @@
 namespace rebound::repstl {
   class String {
   private:
-    char* data;
-    size_t length;
+    char* data = nullptr;
+    size_t length = 0;
   public:
     String() : data(nullptr), length(0) {}
     String(const char* str) {
-      length = std::strlen(str);
-      data = new char[length + 1];
-      std::strcpy(data, str);
+      if (str) {
+        length = std::strlen(str);
+        data = new char[length + 1];
+        std::strcpy(data, str);
+        }
     }
     String(const String& other) {
       length = other.length;
       data = new char[length + 1];
-      std::strcpy(data, other.data);
+      if (other.data) std::strcpy(data, other.data);
+      else data[0] = '\0';
     }
     String(String&& other) noexcept : data(other.data), length(other.length) {
       other.data = nullptr;
@@ -48,7 +51,8 @@ namespace rebound::repstl {
         delete[] data;
         length = other.length;
         data = new char[length + 1];
-        std::strcpy(data, other.data);
+        if (other.data) std::strcpy(data, other.data);
+        else data[0] = '\0';
       }
       return *this;
     }
@@ -92,7 +96,7 @@ namespace rebound::repstl {
     void pop_back() {
       if (length == 0) return;
       char* new_data = new char[length];
-      std::strncpy(new_data, data, length - 1);
+      std::memcpy(new_data, data, length - 1);
       new_data[length - 1] = '\0';
       delete[] data;
       data = new_data;
@@ -102,7 +106,7 @@ namespace rebound::repstl {
     void del_char_at(size_t index) {
       if (index >= length) return;
       char* new_data = new char[length];
-      std::strncpy(new_data, data, index);
+      if (index > 0) std::memcpy(new_data, data, index);
       std::strcpy(new_data + index, data + index + 1);
       delete[] data;
       data = new_data;
@@ -112,6 +116,7 @@ namespace rebound::repstl {
     size_t len() const { return length; }
 
     void del_char(char c) {
+      if (!data) return;
       size_t new_length = 0;
       for (size_t i = 0; i < length; ++i) {
         if (data[i] != c) {
@@ -134,7 +139,7 @@ namespace rebound::repstl {
 
     bool operator==(const String& other) const {
       if (length != other.length) return false;
-      return std::strcmp(data, other.data) == 0;
+      return std::strcmp(c_str(), other.c_str()) == 0;
     }
 
     bool operator!=(const String& other) const { return !(*this == other); }
@@ -154,12 +159,17 @@ namespace rebound::repstl {
       String result;
       result.length = length + other.length;
       result.data = new char[result.length + 1];
+
+      result.data[0] = '\0';
       if (data) std::strcpy(result.data, data);
       if (other.data) std::strcpy(result.data + length, other.data);
+
       return result;
     }
 
+
     String operator+(const char* str) const {
+      if (!str) return *this;
       String result;
       size_t str_len = std::strlen(str);
       result.length = length + str_len;
@@ -170,17 +180,29 @@ namespace rebound::repstl {
     }
 
     String& operator+=(const String& other) {
-      *this = *this + other;
+      char* new_data = new char[length + other.length + 1];
+      new_data[0] = '\0';
+      if (data) std::strcpy(new_data, data);
+      if (other.data) std::strcpy(new_data + length, other.data);
+      delete[] data;
+      data = new_data;
+      length += other.length;
       return *this;
     }
 
     String& operator+=(const char* str) {
-      *this = *this + str;
+      if (!str) return *this;
+      size_t len = std::strlen(str);
+      char* new_data = new char[length + len + 1];
+      new_data[0] = '\0';
+      if (data) std::strcpy(new_data, data);
+      std::strcpy(new_data + length, str);
+      delete[] data;
+      data = new_data;
+      length += len;
       return *this;
     }
   };
 
-  inline String operator+(const char* lhs, const String& rhs) {
-    return rhs + lhs;
-  }
+  inline String operator+(const char* lhs, const String& rhs) { return rhs + lhs; }
 }

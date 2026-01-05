@@ -596,11 +596,11 @@ namespace rebound {
 
     size_t N = particles.size();
     if (internals.p_jh.positions.capacity() != N) {
-      internals.p_jh.positions.assign(N, {0, 0, 0});
-      internals.p_jh.velocities.assign(N, {0, 0, 0});
-      internals.p_jh.accelerations.assign(N, {0, 0, 0});
-      internals.p_jh.mus.assign(N, 0.);
-      internals.p_jh.test_mass.assign(N, false);
+      internals.p_jh.positions.reserve(N);
+      internals.p_jh.velocities.reserve(N);
+      internals.p_jh.accelerations.reserve(N);
+      internals.p_jh.mus.reserve(N);
+      internals.p_jh.test_mass.reserve(N);
       std::copy(particles.test_mass.begin(), particles.test_mass.end(), internals.p_jh.test_mass.begin());
       recalc_coords_this_timestep = true;
     }

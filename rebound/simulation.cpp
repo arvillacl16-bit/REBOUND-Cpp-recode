@@ -55,6 +55,13 @@ namespace rebound {
   }
 
   Simulation &Simulation::operator=(Simulation &&other) { 
+    if (this == &other) return *this;
+
+    delete ptr_hash;
+    delete integrator;
+    delete coll_handler;
+    delete bound_handler;
+
     ptr_hash = other.ptr_hash;
     other.ptr_hash = nullptr; 
 
@@ -64,6 +71,8 @@ namespace rebound {
     integrator = other.integrator; other.integrator = nullptr;
     coll_handler = other.coll_handler; other.coll_handler = nullptr;
     bound_handler = other.bound_handler; other.bound_handler = nullptr;
+
+    particles = std::move(other.particles);
     return *this;
   }
 

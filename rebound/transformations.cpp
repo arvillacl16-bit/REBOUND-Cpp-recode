@@ -21,23 +21,12 @@
 
 namespace rebound {
   namespace _transform {
-
-    // ------------------------------
-    // Helper: safe Vec3 reductions
-    // We accumulate components separately for OpenMP reductions,
-    // then build Vec3 from components.
-    // ------------------------------
-
-    // ------------------------------
-    // Jacobi Transformations (serial -- data-dependent)
-    // ------------------------------
     void inertial_to_jacobi_posvel(const ParticleStore& from, ParticleStore& to) {
       size_t N = from.size();
       double eta = from.mus[0];
       Vec3 s_pos = eta * from.positions[0];
       Vec3 s_vel = eta * from.velocities[0];
 
-      // Serial because s_pos/s_vel update depends on previous iteration
       for (size_t i = 1; i < N; ++i) {
         double ei = 1.0 / eta;
         double mu = from.mus[i];
@@ -47,7 +36,6 @@ namespace rebound {
         to.velocities[i] = from.velocities[i] - ei * s_vel;
 
         if (!from.test_mass[i]) {
-          // update eta and s_pos/s_vel only for real masses
           eta += mu;
           double pme = eta * ei; // = eta / old_eta
           s_pos = s_pos * pme + mu * to.positions[i];
@@ -121,12 +109,10 @@ namespace rebound {
           eta -= mu;
           s_pos *= eta;
           s_vel *= eta;
-          to.print_if_nan_or_inf();
         } else {
           // test particle: simply copy
           to.positions[i] = from.positions[i];
           to.velocities[i] = from.velocities[i];
-          to.print_if_nan_or_inf();
         }
       }
 
@@ -194,13 +180,9 @@ namespace rebound {
       }
     }
 
-    // ------------------------------
-    // Democratic Heliocentric Transformations (parallelizable)
-    // ------------------------------
     void inertial_to_democraticheliocentric_posvel(const ParticleStore& from, ParticleStore& to) {
       size_t N = from.size();
 
-      // component-wise accumulation for OpenMP reduction
       double m0 = from.mus[0];
       double x0x = from.positions[0].x * from.mus[0];
       double x0y = from.positions[0].y * from.mus[0];
