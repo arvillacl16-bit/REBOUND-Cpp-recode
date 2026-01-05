@@ -150,7 +150,7 @@ namespace rebound {
     constexpr unsigned int WHFAST_NMAX_QUART = 64;
     constexpr unsigned int WHFAST_NMAX_NEWT = 32;
 
-    inline void kepler_solver(const WHFast &settings, ParticleStore& p_j, double M, size_t i, double dt) {
+    inline void kepler_solver(const WHFast &, ParticleStore& p_j, double M, size_t i, double dt) {
       Particle p1 = p_j[i];
 
       double r0 = p1.pos().mag();

@@ -62,7 +62,7 @@ namespace rebound {
     void step_p1(ParticleStore& particles, double dt) const;
     void step_p2(ParticleStore& particles, double dt) const;
   public:
-    inline bool init(ParticleStore &particles) { return true; }
+    inline bool init(ParticleStore &) { return true; }
     inline void reset() {}
     void step(ParticleStore& particles, double dt);
   };

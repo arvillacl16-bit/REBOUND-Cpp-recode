@@ -262,7 +262,7 @@ namespace rebound {
     template <typename T>
     void reserve_ex_param(ExtParamMap<T>& map, const repstl::String& name, size_t N) {
       auto it = std::find_if(map.begin(), map.end(), 
-        [&name](const pair<repstl::String, repstl::Vector<T>>& p) { return p.first == name; });
+        [&name](const repstl::pair<repstl::String, repstl::Vector<T>>& p) { return p.first == name; });
       if (it != map.end()) it->second.reserve(N);
     }
   }

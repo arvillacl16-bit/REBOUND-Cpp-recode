@@ -19,16 +19,12 @@
 #pragma once
 #include <cstddef>
 #include "repstl/vector.hpp"
+#include "repstl/pair.hpp"
 
 namespace rebound {
   class Simulation;
   struct Vec3;
   struct ParticleStore;
-
-  template <typename T1, typename T2>
-  struct pair;
-
-  enum class CollisionDetection {NONE, DIRECT, LINE};
 
   struct Collision {
     size_t p1_i = 0;
@@ -43,10 +39,11 @@ namespace rebound {
 
   class CollisionHandler {
   public:
-    pair<bool, repstl::Vector<size_t>> (*handler)(const Collision &c) = nullptr;
+    repstl::pair<bool, repstl::Vector<size_t>> (*handler)(const Collision &c) = nullptr;
     double eps = 0;
 
     virtual bool detect_collision(ParticleStore &particles) = 0;
+    virtual ~CollisionHandler() = default;
   };
 
   class CollisionLine : public CollisionHandler {
@@ -62,7 +59,7 @@ namespace rebound {
   };
 
   namespace collision_handlers {
-    inline pair<bool, repstl::Vector<size_t>> halt(const Collision &c) { return {true, {}}; }
-    pair<bool, repstl::Vector<size_t>> merge(const Collision &c);
+    inline repstl::pair<bool, repstl::Vector<size_t>> halt(const Collision &) { return {true, {}}; }
+    repstl::pair<bool, repstl::Vector<size_t>> merge(const Collision &c);
   }
 }

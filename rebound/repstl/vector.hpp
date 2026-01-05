@@ -165,5 +165,11 @@ namespace rebound::repstl {
       }
       length = new_size;
     }
+
+    bool operator==(const ThisVec &other) const {
+      if (length != other.length) return false;
+      for (size_t i = 0; i < length; ++i) if (other.data[i] != data[i]) return false;
+      return true;
+    }
   };
 }

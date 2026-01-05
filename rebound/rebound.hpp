@@ -32,7 +32,7 @@ namespace rebound {
     hashmap *ptr_hash;
 
     size_t curr_idx = 0;
-  public:
+
     ParticleStore particles;
     Integrator *integrator = nullptr;
     CollisionHandler *coll_handler = nullptr;
@@ -41,7 +41,8 @@ namespace rebound {
     bool do_integration = true;
     bool do_collisions = false;
     bool do_boundaries = false;
-    
+
+  public:
     double dt;
     bool (*heartbeat) (Simulation& sim) = nullptr; // If returns true, makes the integration terminate
 
@@ -56,6 +57,70 @@ namespace rebound {
     Particle add_particle(const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass);
     void remove_particle(size_t idx);
     void remove_particle(uint32_t id);
+
+    inline const ParticleStore &get_particles() const { return particles; }
+    void set_particles(const ParticleStore &particles_);
+
+    inline void set_integrator_none() { do_integration = false; }
+    inline void set_integrator_whfast() { 
+      do_integration = true;
+      delete integrator;
+      integrator = new WHFast;
+    }
+
+    inline void set_integrator_leapfrog() { 
+      do_integration = true;
+      delete integrator;
+      integrator = new Leapfrog;
+    }
+
+    inline void set_integrator_mercurius() { 
+      do_integration = true;
+      delete integrator;
+      integrator = new Mercurius;
+    }
+
+    inline void set_integrator_ias15() { 
+      do_integration = true;
+      delete integrator;
+      integrator = new IAS15;
+    }
+
+    inline void set_collision_none() { do_collisions = false; }
+    inline void set_collision_direct() {
+      do_collisions = true;
+      delete coll_handler;
+      coll_handler = new CollisionDirect;
+    }
+
+    inline void set_collision_line() {
+      do_collisions = true;
+      delete coll_handler;
+      coll_handler = new CollisionLine;
+    }
+
+    inline void set_boundary_none() { do_boundaries = false; }
+    inline void set_boundary_open() {
+      do_boundaries = true;
+      delete bound_handler;
+      bound_handler = new BoundaryOpen;
+    }
+
+    inline void set_boundary_periodic() {
+      do_boundaries = true;
+      delete bound_handler;
+      bound_handler = new BoundaryPeriodic;
+    }
+
+    inline void set_boundary_shear_periodic() {
+      do_boundaries = true;
+      delete bound_handler;
+      bound_handler = new BoundaryShearPeriodic;
+    }
+
+    inline Integrator* get_integrator() { return integrator; }
+    inline CollisionHandler* get_coll_handler() { return coll_handler; }
+    inline BoundaryHandler* get_bound_handler() { return bound_handler; }
 
     inline size_t n() const { return particles.size(); }
     inline size_t n_real() const {

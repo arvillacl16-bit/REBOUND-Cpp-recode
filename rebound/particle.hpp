@@ -21,23 +21,15 @@
 #include <cstdint>
 #include "repstl/vector.hpp"
 #include "repstl/string.hpp"
+#include "repstl/pair.hpp"
 #include "extension_preprocessor.hpp"
 
 namespace rebound {
   struct ind_Particle;
   class Particle;
 
-  template <typename T1, typename T2>
-  struct pair {
-    T1 first;
-    T2 second;
-
-    pair() {}
-    pair(const T1& first_, const T2& second_) : first(first_), second(second_) {}
-  };
-
   template <typename T>
-  using ExtParamMap = repstl::Vector<pair<repstl::String, repstl::Vector<T>>>;
+  using ExtParamMap = repstl::Vector<repstl::pair<repstl::String, repstl::Vector<T>>>;
   struct ParticleStore {
     repstl::Vector<Vec3> positions;
     repstl::Vector<Vec3> velocities;
@@ -74,6 +66,20 @@ namespace rebound {
     const Particle operator[](size_t idx) const;
 
     void print_if_nan_or_inf() const;
+
+    inline bool operator==(const ParticleStore &other) {
+      return positions == other.positions 
+          && velocities == other.velocities
+          && accelerations == other.accelerations
+          && gravity_cs == other.gravity_cs
+          && mus == other.mus
+          && radii == other.radii
+          && ids == other.ids
+          && test_mass == other.test_mass
+          && double_params == other.double_params
+          && int_params == other.int_params
+          && hash_params == other.hash_params;
+    }
   };
 
   class Particle {

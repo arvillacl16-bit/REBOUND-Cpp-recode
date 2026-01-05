@@ -79,7 +79,7 @@ namespace rebound {
     return val;
   }
   namespace collision_handlers {
-    pair<bool, repstl::Vector<size_t>> merge(const Collision &c) {
+    repstl::pair<bool, repstl::Vector<size_t>> merge(const Collision &c) {
       size_t i = c.p1_i;
       size_t j = c.p2_i;
       ParticleStore &particles = *c.particles;
