@@ -19,7 +19,7 @@
 #pragma once
 
 #define LOG(msg) std::cerr << msg << '\n'
-#define LOG_NO_NEWLINE(msg) std::cerr << msg
+#define LOG_NO_NEWLINE(msg) std::cerr << (msg)
 
 #if !(defined(__cplusplus))
 #error "\n\
@@ -56,17 +56,17 @@ namespace rebound {
     constexpr explicit Vec3(double x_) : x(x_) {}
     constexpr Vec3(double x_, double y_, double z_) : x(x_), y(y_), z(z_) {}
 
-    constexpr Vec3 operator+(const Vec3& other) const { return {x + other.x, y + other.y, z + other.z}; }
-    constexpr Vec3 operator-(const Vec3& other) const { return {x - other.x, y - other.y, z - other.z}; }
-    constexpr Vec3 operator*(double scalar) const { return {x * scalar, y * scalar, z * scalar}; }
-    constexpr Vec3 operator/(double scalar) const { return {x / scalar, y / scalar, z / scalar}; }
+    constexpr Vec3 operator+(const Vec3& other) const { return { x + other.x, y + other.y, z + other.z }; }
+    constexpr Vec3 operator-(const Vec3& other) const { return { x - other.x, y - other.y, z - other.z }; }
+    constexpr Vec3 operator*(double scalar) const { return { x * scalar, y * scalar, z * scalar }; }
+    constexpr Vec3 operator/(double scalar) const { return { x / scalar, y / scalar, z / scalar }; }
 
     inline Vec3& operator+=(const Vec3& other) { x += other.x; y += other.y; z += other.z; return *this; }
     inline Vec3& operator-=(const Vec3& other) { x -= other.x; y -= other.y; z -= other.z; return *this; }
     inline Vec3& operator*=(double scalar) { x *= scalar; y *= scalar; z *= scalar; return *this; }
     inline Vec3& operator/=(double scalar) { x /= scalar; y /= scalar; z /= scalar; return *this; }
 
-    constexpr Vec3 operator-() const { return {-x, -y, -z}; }
+    constexpr Vec3 operator-() const { return { -x, -y, -z }; }
 
     constexpr double dot(const Vec3& other) const { return x * other.x + y * other.y + z * other.z; }
     constexpr double mag2() const { return dot(*this); }
@@ -74,14 +74,20 @@ namespace rebound {
     constexpr double distance2(const Vec3& other) const { return (*this - other).mag2(); }
     double distance(const Vec3& other) const { return (*this - other).mag(); }
 
-    constexpr Vec3 cross(const Vec3& other) const { return {y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x}; }
+    constexpr Vec3 cross(const Vec3& other) const { return { y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x }; }
 
     constexpr bool operator==(const Vec3& other) const { return x == other.x && y == other.y && z == other.z; }
     constexpr bool operator!=(const Vec3& other) const { return !operator==(other); }
 
     bool has_nan_or_inf() const {
       return std::isnan(x) || std::isnan(y) || std::isnan(z) ||
-             std::isinf(x) || std::isinf(y) || std::isinf(z);
+        std::isinf(x) || std::isinf(y) || std::isinf(z);
+    }
+
+    bool almost_eq(Vec3 other, double tol = 1e-9) const {
+      return std::abs(x - other.x) / x < tol
+        || std::abs(y - other.y) / y < tol
+        || std::abs(z - other.z) / z < tol;
     }
 
     constexpr explicit operator bool() const { return !(!x && !y && !z); }
