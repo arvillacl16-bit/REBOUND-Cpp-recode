@@ -84,13 +84,15 @@ namespace rebound {
         std::isinf(x) || std::isinf(y) || std::isinf(z);
     }
 
-    bool almost_eq(Vec3 other, double tol = 1e-9) const {
-      return std::abs(x - other.x) / x < tol
-        || std::abs(y - other.y) / y < tol
-        || std::abs(z - other.z) / z < tol;
+    constexpr bool almost_eq(Vec3 other, double tol = 1e-9) const {
+      return abs(x - other.x) / x < tol
+        || abs(y - other.y) / y < tol
+        || abs(z - other.z) / z < tol;
     }
 
     constexpr explicit operator bool() const { return !(!x && !y && !z); }
+  private:
+    static constexpr bool abs(double x) { return x < 0 ? -x : x; }
   };
 
   constexpr Vec3 operator*(double scalar, const Vec3& vec) { return vec * scalar; }
