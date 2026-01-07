@@ -2,12 +2,6 @@
 *.o
 *.obj
 *.a
-test
-test.cpp
 *.exe
 /reference
-/objfiles
-meson.build
-rebound/meson.build
-meson_options.txt
 /builddir
