@@ -26,7 +26,7 @@ namespace rebound {
     void reset_temp_acc(size_t N, int n_threads) {
       if (temp_acc_flat.size() != n_threads * N) temp_acc_flat.assign(n_threads * N, Vec3{});
       else {
-        for (auto &v : temp_acc_flat) v = Vec3{};
+        for (auto& v : temp_acc_flat) v = Vec3{};
       }
     }
 
@@ -40,26 +40,26 @@ namespace rebound {
       const size_t N = particles.size();
 
       // Zero particle accelerations
-      #pragma omp parallel for
+#pragma omp parallel for
       for (size_t i = 0; i < N; ++i)
         particles.accelerations[i] = Vec3{};
 
       int n_threads = 1;
-    #ifdef _OPENMP
+#ifdef _OPENMP
       n_threads = omp_get_max_threads();
-    #endif
+#endif
 
       // Reset flattened temp accumulator
       reset_temp_acc(N, n_threads);
 
-      #pragma omp parallel
+#pragma omp parallel
       {
         int tid = 0;
-  #ifdef _OPENMP
+#ifdef _OPENMP
         tid = omp_get_thread_num();
-  #endif
+#endif
 
-        #pragma omp for schedule(static)
+#pragma omp for schedule(static)
         for (size_t i = 0; i < N; ++i) {
           if (particles.test_mass[i]) continue;
 
@@ -77,7 +77,7 @@ namespace rebound {
       }
 
       // Reduce thread-local sums
-      #pragma omp parallel for
+#pragma omp parallel for
       for (size_t i = 0; i < N; ++i) {
         Vec3 acc{};
         for (int t = 0; t < n_threads; ++t)
@@ -90,27 +90,27 @@ namespace rebound {
       const size_t N = particles.size();
 
       // Zero particle accelerations
-      #pragma omp parallel for
+#pragma omp parallel for
       for (size_t i = 0; i < N; ++i)
         particles.accelerations[i] = Vec3{};
 
       int n_threads = 1;
-    #ifdef _OPENMP
+#ifdef _OPENMP
       n_threads = omp_get_max_threads();
-    #endif
+#endif
 
       // Reset flattened temp accumulator
       reset_temp_acc(N, n_threads);
 
-      #pragma omp parallel
+#pragma omp parallel
       {
-            int tid = 0;
-    #ifdef _OPENMP
-            tid = omp_get_thread_num();
-    #endif
+        int tid = 0;
+#ifdef _OPENMP
+        tid = omp_get_thread_num();
+#endif
 
-          #pragma omp for schedule(static)
-      for (size_t i = 1; i < N; ++i) {
+#pragma omp for schedule(static)
+        for (size_t i = 1; i < N; ++i) {
           for (size_t j = 0; j < i; ++j) {
             if (particles.test_mass[i] && particles.test_mass[j]) continue;
 
@@ -125,7 +125,7 @@ namespace rebound {
       }
 
       // Reduce thread-local sums
-      #pragma omp parallel for
+#pragma omp parallel for
       for (size_t i = 0; i < N; ++i) {
         Vec3 acc{};
         for (int t = 0; t < n_threads; ++t)
@@ -134,16 +134,12 @@ namespace rebound {
       }
     }
 
-    void calc_accel_mercurius(ParticleStore &particles, double softening2, Mercurius &settings) {
-      calc_accel_basic(particles, softening2);
-    }
-
-    void calc_accel_compensated(ParticleStore &particles, double softening2) {
+    void calc_accel_compensated(ParticleStore& particles, double softening2) {
       size_t N = particles.size();
       if (particles.gravity_cs.size() < N) particles.gravity_cs.resize(N, Vec3{});
 
-      auto &cs = particles.gravity_cs;
-      auto &test_mass = particles.test_mass;
+      auto& cs = particles.gravity_cs;
+      auto& test_mass = particles.test_mass;
 #pragma omp parallel for
       for (size_t i = 0; i < N; ++i) {
         particles.accelerations[i] = {};

@@ -23,14 +23,12 @@ namespace rebound {
     LEAPFROG,
     WHFAST,
     IAS15,
-    MERCURIUS,
     NONE
   };
 
   enum class GravityMethod {
     BASIC,
     COMPENSATED,
-    MERCURIUS,
     JACOBI,
     NONE
   };
@@ -42,16 +40,15 @@ namespace rebound {
     void calc_accel_basic(ParticleStore& particles, double);
     void calc_accel_jacobi(ParticleStore& particles, double);
     void calc_accel_compensated(ParticleStore& particles, double);
-    void calc_accel_mercurius(ParticleStore& particles, double, Mercurius &settings);
   }
 
   class Integrator {
   public:
     double softening2 = 0;
     GravityMethod gravity_method = GravityMethod::BASIC;
-    
+
     virtual void step(ParticleStore& particles, double dt) = 0;
-    virtual bool init(ParticleStore &particles) = 0;
+    virtual bool init(ParticleStore& particles) = 0;
     virtual void reset() = 0;
 
     virtual ~Integrator() = default;
@@ -62,22 +59,22 @@ namespace rebound {
     void step_p1(ParticleStore& particles, double dt) const;
     void step_p2(ParticleStore& particles, double dt) const;
   public:
-    inline bool init(ParticleStore &) { return true; }
+    inline bool init(ParticleStore&) { return true; }
     inline void reset() {}
     void step(ParticleStore& particles, double dt);
   };
 
   class WHFast : public Integrator {
   private:
-    bool init(ParticleStore &particles);
-    void from_inertial(ParticleStore &particles);
-    void to_inertial(ParticleStore &particles);
-    void debug_operator_kepler(ParticleStore &particles, double dt);
-    void debug_operator_interaction(ParticleStore &particles, double dt);
+    bool init(ParticleStore& particles);
+    void from_inertial(ParticleStore& particles);
+    void to_inertial(ParticleStore& particles);
+    void debug_operator_kepler(ParticleStore& particles, double dt);
+    void debug_operator_interaction(ParticleStore& particles, double dt);
     void reset();
     void step_p1(ParticleStore& particles, double dt);
     void step_p2(ParticleStore& particles, double dt);
-    void synchronize(ParticleStore &particles, double dt);
+    void synchronize(ParticleStore& particles, double dt);
   public:
     enum class Coordinates { JACOBI, DEMOCRATIC_HELIOCENTRIC, WHDS, BARYCENTRIC };
     enum class Kernel { DEFAULT, MODIFIEDKICK, COMPOSITION, LAZY };
@@ -108,7 +105,7 @@ namespace rebound {
   public:
     double precision = 1e-10;
 
-    bool init(ParticleStore &particles);
+    bool init(ParticleStore& particles);
     void reset();
     void step(ParticleStore& particles, double dt);
   };
@@ -120,7 +117,7 @@ namespace rebound {
   public:
     double r_crit_hill = 3.0;
 
-    bool init(ParticleStore &particles);
+    bool init(ParticleStore& particles);
     void reset();
     void step(ParticleStore& particles, double dt);
   };

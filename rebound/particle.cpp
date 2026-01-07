@@ -92,7 +92,9 @@ namespace rebound {
   }
 
   Particle::Particle(ParticleStore& store_, const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass_)
-    : index(store_.size()), store(store_), version(0) { store.add_particle(position, velocity, mu, radius, id, test_mass_); }
+    : index(store_.size()), version(0), store(store_) {
+    store.add_particle(position, velocity, mu, radius, id, test_mass_);
+  }
 
   Vec3& Particle::pos() {
     return store.positions[index];
@@ -135,19 +137,19 @@ namespace rebound {
     return store.accelerations[index];
   }
 
-  const double &Particle::mu() const {
+  const double& Particle::mu() const {
     return store.mus[index];
   }
 
-  const double &Particle::radius() const {
+  const double& Particle::radius() const {
     return store.radii[index];
   }
 
-  const uint32_t &Particle::id() const {
+  const uint32_t& Particle::id() const {
     return store.ids[index];
   }
 
-  const bool &Particle::get_test_mass() const {
+  const bool& Particle::get_test_mass() const {
     return reinterpret_cast<const bool&>(store.test_mass[index]);
   }
 
@@ -208,9 +210,9 @@ namespace rebound {
 
     double f = 0.0;
     if (e > 1e-16)
-        f = std::acos(e_vec.dot(r) / (e * r_mag));
+      f = std::acos(e_vec.dot(r) / (e * r_mag));
     if (r.dot(v) < 0)
-        f = 2.0 * M_PI - f;
+      f = 2.0 * M_PI - f;
 
     return Orbit(a, e, inc, Omega, omega, f);
   }
@@ -239,16 +241,16 @@ namespace rebound {
 
     Vec3 r_eci;
     r_eci.x = (cos_Omega * cos_omega - sin_Omega * sin_omega * cos_inc) * r_perifocal.x +
-              (-cos_Omega * sin_omega - sin_Omega * cos_omega * cos_inc) * r_perifocal.y;
+      (-cos_Omega * sin_omega - sin_Omega * cos_omega * cos_inc) * r_perifocal.y;
     r_eci.y = (sin_Omega * cos_omega + cos_Omega * sin_omega * cos_inc) * r_perifocal.x +
-              (-sin_Omega * sin_omega + cos_Omega * cos_omega * cos_inc) * r_perifocal.y;
+      (-sin_Omega * sin_omega + cos_Omega * cos_omega * cos_inc) * r_perifocal.y;
     r_eci.z = (sin_omega * sin_inc) * r_perifocal.x + (cos_omega * sin_inc) * r_perifocal.y;
 
     Vec3 v_eci;
     v_eci.x = (cos_Omega * cos_omega - sin_Omega * sin_omega * cos_inc) * v_perifocal.x +
-              (-cos_Omega * sin_omega - sin_Omega * cos_omega * cos_inc) * v_perifocal.y;
+      (-cos_Omega * sin_omega - sin_Omega * cos_omega * cos_inc) * v_perifocal.y;
     v_eci.y = (sin_Omega * cos_omega + cos_Omega * sin_omega * cos_inc) * v_perifocal.x +
-              (-sin_Omega * sin_omega + cos_Omega * cos_omega * cos_inc) * v_perifocal.y;
+      (-sin_Omega * sin_omega + cos_Omega * cos_omega * cos_inc) * v_perifocal.y;
     v_eci.z = (sin_omega * sin_inc) * v_perifocal.x + (cos_omega * sin_inc) * v_perifocal.y;
     Vec3 position = primary.pos() + r_eci;
     Vec3 velocity = primary.vel() + v_eci;
@@ -261,38 +263,38 @@ namespace rebound {
   namespace {
     template <typename T>
     void reserve_ex_param(ExtParamMap<T>& map, const repstl::String& name, size_t N) {
-      auto it = std::find_if(map.begin(), map.end(), 
+      auto it = std::find_if(map.begin(), map.end(),
         [&name](const repstl::pair<repstl::String, repstl::Vector<T>>& p) { return p.first == name; });
       if (it != map.end()) it->second.reserve(N);
     }
   }
 
-  void ParticleStore::reserve_double_ex_params(const repstl::Vector<repstl::String> &names) {
+  void ParticleStore::reserve_double_ex_params(const repstl::Vector<repstl::String>& names) {
     size_t N = size();
     for (auto it = names.cbegin(); it != names.cend(); ++it) reserve_ex_param(double_params, *it, N);
   }
 
-  void ParticleStore::reserve_int_ex_params(const repstl::Vector<repstl::String> &names) {
+  void ParticleStore::reserve_int_ex_params(const repstl::Vector<repstl::String>& names) {
     size_t N = size();
     for (auto it = names.cbegin(); it != names.cend(); ++it) reserve_ex_param(int_params, *it, N);
   }
 
-  void ParticleStore::reserve_hash_ex_params(const repstl::Vector<repstl::String> &names) {
+  void ParticleStore::reserve_hash_ex_params(const repstl::Vector<repstl::String>& names) {
     size_t N = size();
     for (auto it = names.cbegin(); it != names.cend(); ++it) reserve_ex_param(hash_params, *it, N);
   }
 
-  void ParticleStore::reserve_double_ex_param(const repstl::String &name) {
+  void ParticleStore::reserve_double_ex_param(const repstl::String& name) {
     size_t N = size();
     reserve_ex_param(double_params, name, N);
   }
 
-  void ParticleStore::reserve_int_ex_param(const repstl::String &name) {
+  void ParticleStore::reserve_int_ex_param(const repstl::String& name) {
     size_t N = size();
     reserve_ex_param(int_params, name, N);
   }
 
-  void ParticleStore::reserve_hash_ex_param(const repstl::String &name) {
+  void ParticleStore::reserve_hash_ex_param(const repstl::String& name) {
     size_t N = size();
     reserve_ex_param(hash_params, name, N);
   }
