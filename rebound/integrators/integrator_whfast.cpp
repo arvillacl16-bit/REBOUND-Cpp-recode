@@ -358,7 +358,7 @@ namespace rebound {
             double mu = particles.mus[i];
             p += mu * p_h.velocities[i] / (m0 + mu);
           }
-#pragma omp parallel for reduction
+#pragma omp parallel for
           for (size_t i = 1; i < N; ++i) {
             if (particles.test_mass[i]) p_h.positions[i] += p;
             else {
@@ -392,7 +392,7 @@ namespace rebound {
             if (!particles.test_mass[i])
               running_eta += p_j.mus[i];
           }
-#pragma omp parallel for reduction
+#pragma omp parallel for
           for (size_t i = 1; i < N; ++i)
             kepler_solver(settings, p_j, etas[i], i, dt);
           break;

@@ -9,9 +9,9 @@ project(
 )
 
 # Create OpenMP dependency if requested
-omp_dep = dependency('openmp', required : true)
+omp_dep = dependency('openmp', required : get_option('openmp'))
 
-reb_ref_lib = meson.source_root() / 'libactrebound.a'  # Reference to the original library name
+reb_ref_lib = meson.project_source_root() / 'libactrebound.a'  # Reference to the original library name
 
 subdir('rebound')
 

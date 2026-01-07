@@ -70,7 +70,7 @@ int main() {
   sim.add_particle({ 0,0,0 }, { 0,0,0 }, 1.327e11, 696340.0, 1, false); // Sun
   sim.add_particle({ 149.6e6,0,0 }, { 0,29.78,0 }, 3.003e-6 * 1.327e11, 6371.0, 2, false); // Earth
   // sim.add_particle({160.6e6,0,0}, {0,27.0,0}, 3.213e-7 * 1.327e11, 3389.5, 3, false); // Earth 2 for interaction testing
-  sim.dt = 18 * 86400; // 18 days
+  sim.dt = 18. * 86400.; // 18 days
   sim.step(sim.dt);
   Vec3 pos = particles[1].pos();
   Vec3 vel = particles[1].vel();

@@ -1,6 +1,5 @@
 # rebound/meson.build
 
-# Gather all source files
 rebound_sources = files(
   'save.cpp',
   'simulation.cpp',
@@ -12,12 +11,22 @@ rebound_sources = files(
   'particle.cpp'
 )
 
-# Create a static library
+deps = []
+if omp_dep.found()
+  deps += omp_dep
+endif
+
 rebound_lib = static_library(
   'rebound',
   rebound_sources,
   include_directories : include_directories('.'),
+  dependencies : deps
 )
 
-# Optional: export this library variable for parent meson.build
+rebound_dep = declare_dependency(
+  link_with : rebound_lib,
+  include_directories : include_directories('.'),
+  dependencies : deps
+)
+
 rebound_lib
