@@ -19,7 +19,7 @@
 #pragma once
 #include <stddef.h>
 #include <cstring>
-#include "exception.hpp"
+#include "exception"
 
 namespace rebound::repstl {
   class String {
@@ -33,7 +33,7 @@ namespace rebound::repstl {
         length = std::strlen(str);
         data = new char[length + 1];
         std::strcpy(data, str);
-        }
+      }
     }
     String(const String& other) {
       length = other.length;
@@ -72,8 +72,8 @@ namespace rebound::repstl {
 
     const char* c_str() const { return data ? data : ""; }
 
-    const char &operator[](size_t index) const { return data[index]; }
-    char &operator[](size_t index) { return data[index]; }
+    const char& operator[](size_t index) const { return data[index]; }
+    char& operator[](size_t index) { return data[index]; }
 
     void clear() {
       delete[] data;
@@ -127,12 +127,12 @@ namespace rebound::repstl {
       length = new_length;
     }
 
-    const char &at(size_t index) const {
+    const char& at(size_t index) const {
       if (index >= length) throw IndexOutOfBounds("Index out of range");
       return data[index];
     }
 
-    char &at(size_t index) {
+    char& at(size_t index) {
       if (index >= length) throw IndexOutOfBounds("Index out of range");
       return data[index];
     }

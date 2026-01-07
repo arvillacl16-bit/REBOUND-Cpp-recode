@@ -16,7 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rebound.hpp"
+#include "../rebound.hpp"
 #include <cmath>
 #include <omp.h>
 

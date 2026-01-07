@@ -16,7 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "particle.hpp"
+#include "../utils/particle.hpp"
 
 namespace rebound {
   enum class IntegratorMethod {

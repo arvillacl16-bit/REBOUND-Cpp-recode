@@ -1,7 +1,5 @@
 /.vscode
-*.o
 *.obj
-*.a
 *.exe
 /reference
 /builddir

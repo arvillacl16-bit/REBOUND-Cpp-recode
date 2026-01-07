@@ -19,10 +19,9 @@
 #pragma once
 #include "vec.hpp"
 #include <cstdint>
-#include "repstl/vector.hpp"
-#include "repstl/string.hpp"
-#include "repstl/pair.hpp"
-#include "extension_preprocessor.hpp"
+#include "../repstl/vector"
+#include "../repstl/string"
+#include "../repstl/pair"
 
 namespace rebound {
   struct ind_Particle;
@@ -46,13 +45,13 @@ namespace rebound {
     ExtParamMap<uint32_t> hash_params;
     ExtParamMap<int> int_params;
 
-    void reserve_double_ex_params(const repstl::Vector<repstl::String> &names);
-    void reserve_int_ex_params(const repstl::Vector<repstl::String> &names);
-    void reserve_hash_ex_params(const repstl::Vector<repstl::String> &names);
+    void reserve_double_ex_params(const repstl::Vector<repstl::String>& names);
+    void reserve_int_ex_params(const repstl::Vector<repstl::String>& names);
+    void reserve_hash_ex_params(const repstl::Vector<repstl::String>& names);
 
-    void reserve_double_ex_param(const repstl::String &name);
-    void reserve_int_ex_param(const repstl::String &name);
-    void reserve_hash_ex_param(const repstl::String &name);
+    void reserve_double_ex_param(const repstl::String& name);
+    void reserve_int_ex_param(const repstl::String& name);
+    void reserve_hash_ex_param(const repstl::String& name);
 
     ParticleStore(size_t capacity = 0);
 
@@ -67,18 +66,18 @@ namespace rebound {
 
     void print_if_nan_or_inf() const;
 
-    inline bool operator==(const ParticleStore &other) {
-      return positions == other.positions 
-          && velocities == other.velocities
-          && accelerations == other.accelerations
-          && gravity_cs == other.gravity_cs
-          && mus == other.mus
-          && radii == other.radii
-          && ids == other.ids
-          && test_mass == other.test_mass
-          && double_params == other.double_params
-          && int_params == other.int_params
-          && hash_params == other.hash_params;
+    inline bool operator==(const ParticleStore& other) {
+      return positions == other.positions
+        && velocities == other.velocities
+        && accelerations == other.accelerations
+        && gravity_cs == other.gravity_cs
+        && mus == other.mus
+        && radii == other.radii
+        && ids == other.ids
+        && test_mass == other.test_mass
+        && double_params == other.double_params
+        && int_params == other.int_params
+        && hash_params == other.hash_params;
     }
   };
 
@@ -102,10 +101,10 @@ namespace rebound {
     const Vec3& pos() const;
     const Vec3& vel() const;
     const Vec3& acc() const;
-    const double &mu() const;
-    const double &radius() const;
-    const uint32_t &id() const;
-    const bool &get_test_mass() const;
+    const double& mu() const;
+    const double& radius() const;
+    const uint32_t& id() const;
+    const bool& get_test_mass() const;
 
     ind_Particle snap() const;
 
@@ -121,7 +120,8 @@ namespace rebound {
     double f;
 
     Orbit(double a_, double e_, double inc_, double Omega_, double omega_, double f_)
-      : a(a_), e(e_), inc(inc_), Omega(Omega_), omega(omega_), f(f_) {}
+      : a(a_), e(e_), inc(inc_), Omega(Omega_), omega(omega_), f(f_) {
+    }
 
     static Orbit from_particles(const Particle& primary, const Particle& secondary);
 
@@ -140,7 +140,8 @@ namespace rebound {
 
     ind_Particle() : pos(), vel(), mu(0), r(0), id(0), test_mass(false) {}
     ind_Particle(const Vec3& p, const Vec3& v, double mu_, double r_, uint32_t id_, bool test_mass_ = false)
-        : pos(p), vel(v), mu(mu_), r(r_), id(id_), test_mass(test_mass_) {}
+      : pos(p), vel(v), mu(mu_), r(r_), id(id_), test_mass(test_mass_) {
+    }
     ind_Particle(const Particle& p) : pos(p.pos()), vel(p.vel()), mu(p.mu()), r(p.radius()), id(p.id()), test_mass(p.get_test_mass()) {}
 
     static ind_Particle from_orbit(const Orbit& orbit, const Particle& primary, const Particle& secondary, uint32_t id, bool test_mass = false);

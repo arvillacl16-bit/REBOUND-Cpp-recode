@@ -1,14 +1,15 @@
 # rebound/meson.build
 
 rebound_sources = files(
-  'save.cpp',
-  'simulation.cpp',
-  'integrators/integrator_whfast.cpp',
-  'integrators/integrator_leapfrog.cpp',
-  'acceleration.cpp',
-  'collision.cpp',
-  'transformations.cpp',
-  'particle.cpp'
+  'utils/save.cpp',
+  'utils/simulation.cpp',
+  'integration/integrator_whfast.cpp',
+  'integration/integrator_leapfrog.cpp',
+  'integration/acceleration.cpp',
+  'non_integration/collision.cpp',
+  'non_integration/boundary.cpp',
+  'utils/transformations.cpp',
+  'utils/particle.cpp'
 )
 
 deps = []

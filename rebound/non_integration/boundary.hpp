@@ -17,7 +17,7 @@
  */
 
 #pragma once
-#include "vec.hpp"
+#include "../utils/vec.hpp"
 
 namespace rebound {
   struct ParticleStore;
@@ -30,22 +30,22 @@ namespace rebound {
       double c = 0;
     } boundary;
 
-    virtual void handle_boundary(ParticleStore &particles) = 0;
+    virtual void handle_boundary(ParticleStore& particles) = 0;
     virtual ~BoundaryHandler() = default;
   };
 
   class BoundaryOpen : public BoundaryHandler {
   public:
-    void handle_boundary(ParticleStore &particles);
+    void handle_boundary(ParticleStore& particles);
   };
 
   class BoundaryPeriodic : public BoundaryHandler {
   public:
-    void handle_boundary(ParticleStore &particles);
+    void handle_boundary(ParticleStore& particles);
   };
 
   class BoundaryShearPeriodic : public BoundaryHandler {
   public:
-    void handle_boundary(ParticleStore &particles);
+    void handle_boundary(ParticleStore& particles);
   };
 }

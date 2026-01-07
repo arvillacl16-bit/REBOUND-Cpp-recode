@@ -20,7 +20,7 @@
  */
 
 #pragma once
-#include "exception.hpp"
+#include "exception"
 #include <initializer_list>
 #include <stddef.h>
 

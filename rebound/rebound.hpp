@@ -17,11 +17,10 @@
  */
 
 #pragma once
-#include "particle.hpp"
-#include "integrator.hpp"
-#include "collision.hpp"
-#include "boundary.hpp"
-#include "transformations.hpp"
+#include "utils/particle.hpp"
+#include "integration/integrator.hpp"
+#include "non_integration/collision.hpp"
+#include "non_integration/boundary.hpp"
 
 namespace rebound {
   class Simulation {
@@ -29,14 +28,14 @@ namespace rebound {
     double t;
 
     struct hashmap;
-    hashmap *ptr_hash;
+    hashmap* ptr_hash;
 
     size_t curr_idx = 0;
 
     ParticleStore particles;
-    Integrator *integrator = nullptr;
-    CollisionHandler *coll_handler = nullptr;
-    BoundaryHandler *bound_handler = nullptr;
+    Integrator* integrator = nullptr;
+    CollisionHandler* coll_handler = nullptr;
+    BoundaryHandler* bound_handler = nullptr;
 
     bool do_integration = true;
     bool do_collisions = false;
@@ -47,43 +46,43 @@ namespace rebound {
     bool (*heartbeat) (Simulation& sim) = nullptr; // If returns true, makes the integration terminate
 
     Simulation();
-    explicit Simulation(const repstl::String &filename);
+    explicit Simulation(const repstl::String& filename);
     ~Simulation();
-    Simulation(const Simulation &sim);
-    Simulation(Simulation &&sim);
-    Simulation &operator=(const Simulation &sim);
-    Simulation &operator=(Simulation &&sim);
+    Simulation(const Simulation& sim);
+    Simulation(Simulation&& sim);
+    Simulation& operator=(const Simulation& sim);
+    Simulation& operator=(Simulation&& sim);
 
     Particle add_particle(const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass);
     void remove_particle(size_t idx);
     void remove_particle(uint32_t id);
 
-    inline const ParticleStore &get_particles() const { return particles; }
-    void set_particles(const ParticleStore &particles_);
+    inline const ParticleStore& get_particles() const { return particles; }
+    void set_particles(const ParticleStore& particles_);
 
     inline void set_integrator_none() { do_integration = false; }
-    inline WHFast &set_integrator_whfast() { 
+    inline WHFast& set_integrator_whfast() {
       do_integration = true;
       delete integrator;
       integrator = new WHFast;
       return (WHFast&)(*integrator);
     }
 
-    inline Leapfrog &set_integrator_leapfrog() { 
+    inline Leapfrog& set_integrator_leapfrog() {
       do_integration = true;
       delete integrator;
       integrator = new Leapfrog;
       return (Leapfrog&)(*integrator);
     }
 
-    inline Mercurius &set_integrator_mercurius() { 
+    inline Mercurius& set_integrator_mercurius() {
       do_integration = true;
       delete integrator;
       integrator = new Mercurius;
       return (Mercurius&)(*integrator);
     }
 
-    inline IAS15 &set_integrator_ias15() { 
+    inline IAS15& set_integrator_ias15() {
       do_integration = true;
       delete integrator;
       integrator = new IAS15;
@@ -91,14 +90,14 @@ namespace rebound {
     }
 
     inline void set_collision_none() { do_collisions = false; }
-    inline CollisionDirect &set_collision_direct() {
+    inline CollisionDirect& set_collision_direct() {
       do_collisions = true;
       delete coll_handler;
       coll_handler = new CollisionDirect;
       return (CollisionDirect&)(*coll_handler);
     }
 
-    inline CollisionLine &set_collision_line() {
+    inline CollisionLine& set_collision_line() {
       do_collisions = true;
       delete coll_handler;
       coll_handler = new CollisionLine;
@@ -106,21 +105,21 @@ namespace rebound {
     }
 
     inline void set_boundary_none() { do_boundaries = false; }
-    inline BoundaryOpen &set_boundary_open() {
+    inline BoundaryOpen& set_boundary_open() {
       do_boundaries = true;
       delete bound_handler;
       bound_handler = new BoundaryOpen;
       return (BoundaryOpen&)(*bound_handler);
     }
 
-    inline BoundaryPeriodic &set_boundary_periodic() {
+    inline BoundaryPeriodic& set_boundary_periodic() {
       do_boundaries = true;
       delete bound_handler;
       bound_handler = new BoundaryPeriodic;
       return (BoundaryPeriodic&)(*bound_handler);
     }
 
-    inline BoundaryShearPeriodic &set_boundary_shear_periodic() {
+    inline BoundaryShearPeriodic& set_boundary_shear_periodic() {
       do_boundaries = true;
       delete bound_handler;
       bound_handler = new BoundaryShearPeriodic;

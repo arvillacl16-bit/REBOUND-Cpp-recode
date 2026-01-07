@@ -18,8 +18,8 @@
 
 #pragma once
 #include <cstddef>
-#include "repstl/vector.hpp"
-#include "repstl/pair.hpp"
+#include "../repstl/vector"
+#include "../repstl/pair"
 
 namespace rebound {
   class Simulation;
@@ -32,34 +32,35 @@ namespace rebound {
     ParticleStore* particles = nullptr;
 
     Collision(size_t p1_i, size_t p2_i, ParticleStore* particles)
-      : p1_i(p1_i), p2_i(p2_i), particles(particles) {}
+      : p1_i(p1_i), p2_i(p2_i), particles(particles) {
+    }
 
     virtual ~Collision() = default;
   };
 
   class CollisionHandler {
   public:
-    repstl::pair<bool, repstl::Vector<size_t>> (*handler)(const Collision &c) = nullptr;
+    repstl::pair<bool, repstl::Vector<size_t>>(*handler)(const Collision& c) = nullptr;
     double eps = 0;
 
-    virtual bool detect_collision(ParticleStore &particles) = 0;
+    virtual bool detect_collision(ParticleStore& particles) = 0;
     virtual ~CollisionHandler() = default;
   };
 
   class CollisionLine : public CollisionHandler {
   public:
     repstl::Vector<Vec3> prev_pos{};
-    
-    bool detect_collision(ParticleStore &particles);
+
+    bool detect_collision(ParticleStore& particles);
   };
 
   class CollisionDirect : public CollisionHandler {
   public:
-    bool detect_collision(ParticleStore &particles);
+    bool detect_collision(ParticleStore& particles);
   };
 
   namespace collision_handlers {
-    inline repstl::pair<bool, repstl::Vector<size_t>> halt(const Collision &) { return {true, {}}; }
-    repstl::pair<bool, repstl::Vector<size_t>> merge(const Collision &c);
+    inline repstl::pair<bool, repstl::Vector<size_t>> halt(const Collision&) { return { true, {} }; }
+    repstl::pair<bool, repstl::Vector<size_t>> merge(const Collision& c);
   }
 }
