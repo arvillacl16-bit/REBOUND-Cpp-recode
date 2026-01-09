@@ -1,33 +1,37 @@
 # rebound/meson.build
 
+current_deps = []
+if get_option('openmp')
+  current_deps += omp_dep
+endif
+
+# These are your SOURCE files to be compiled
 rebound_sources = files(
+  'integration/acceleration.cpp',
+  'integration/integrator_leapfrog.cpp',
+  'integration/integrator_whfast.cpp',
+  'non_integration/boundary.cpp',
+  'non_integration/collision.cpp',
+  'utils/particle.cpp',
   'utils/save.cpp',
   'utils/simulation.cpp',
-  'integration/integrator_whfast.cpp',
-  'integration/integrator_leapfrog.cpp',
-  'integration/acceleration.cpp',
-  'non_integration/collision.cpp',
-  'non_integration/boundary.cpp',
-  'utils/transformations.cpp',
-  'utils/particle.cpp'
+  'utils/transformations.cpp'
 )
 
-deps = []
-if omp_dep.found()
-  deps += omp_dep
-endif
+# This tells the compiler where to find your .hpp files
+# Assuming they are in the 'rebound' root and subfolders
+rebound_includes = include_directories('.', 'integration', 'non_integration', 'utils')
 
 rebound_lib = static_library(
   'rebound',
-  rebound_sources,
-  include_directories : include_directories('.'),
-  dependencies : deps
+  rebound_sources,              # Sources go first
+  include_directories : rebound_includes,
+  dependencies : current_deps,
+  install : false
 )
 
 rebound_dep = declare_dependency(
   link_with : rebound_lib,
-  include_directories : include_directories('.'),
-  dependencies : deps
+  include_directories : rebound_includes, # Pass the include paths to the test executable
+  dependencies : current_deps
 )
-
-rebound_lib

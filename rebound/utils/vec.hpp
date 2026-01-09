@@ -59,7 +59,7 @@ namespace rebound {
     constexpr Vec3 operator+(const Vec3& other) const { return { x + other.x, y + other.y, z + other.z }; }
     constexpr Vec3 operator-(const Vec3& other) const { return { x - other.x, y - other.y, z - other.z }; }
     constexpr Vec3 operator*(double scalar) const { return { x * scalar, y * scalar, z * scalar }; }
-    constexpr Vec3 operator/(double scalar) const { return { x / scalar, y / scalar, z / scalar }; }
+    constexpr Vec3 operator/(double scalar) const { return operator*(1 / scalar); }
 
     inline Vec3& operator+=(const Vec3& other) { x += other.x; y += other.y; z += other.z; return *this; }
     inline Vec3& operator-=(const Vec3& other) { x -= other.x; y -= other.y; z -= other.z; return *this; }
@@ -84,15 +84,8 @@ namespace rebound {
         std::isinf(x) || std::isinf(y) || std::isinf(z);
     }
 
-    constexpr bool almost_eq(Vec3 other, double tol = 1e-9) const {
-      return abs(x - other.x) / x < tol
-        || abs(y - other.y) / y < tol
-        || abs(z - other.z) / z < tol;
-    }
-
+    constexpr bool almost_eq(Vec3 other, double tol = 1e-9) const { return operator-(other).mag2() < (tol * tol); }
     constexpr explicit operator bool() const { return !(!x && !y && !z); }
-  private:
-    static constexpr bool abs(double x) { return x < 0 ? -x : x; }
   };
 
   constexpr Vec3 operator*(double scalar, const Vec3& vec) { return vec * scalar; }

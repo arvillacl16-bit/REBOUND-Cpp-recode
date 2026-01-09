@@ -653,6 +653,10 @@ namespace rebound {
       internals.p_jh.accelerations.reserve(N);
       internals.p_jh.mus.reserve(N);
       internals.p_jh.test_mass.reserve(N);
+      std::copy(particles.positions.begin(), particles.positions.end(), internals.p_jh.positions.begin());
+      std::copy(particles.velocities.begin(), particles.velocities.end(), internals.p_jh.velocities.begin());
+      std::copy(particles.accelerations.begin(), particles.accelerations.end(), internals.p_jh.accelerations.begin());
+      std::copy(particles.mus.begin(), particles.mus.end(), internals.p_jh.mus.begin());
       std::copy(particles.test_mass.begin(), particles.test_mass.end(), internals.p_jh.test_mass.begin());
       recalc_coords_this_timestep = true;
     }

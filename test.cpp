@@ -64,14 +64,14 @@ int main() {
   using namespace rebound;
   Simulation sim;
   const ParticleStore& particles = sim.get_particles();
-  WHFast& whfast = sim.set_integrator_whfast();
+  auto& whfast = sim.set_integrator_whfast();
   whfast.gravity_method = GravityMethod::JACOBI;
-  whfast.coordinates = WHFast::Coordinates::WHDS;
+  // whfast.coordinates = WHFast::Coordinates::WHDS;
   sim.add_particle({ 0,0,0 }, { 0,0,0 }, 1.327e11, 696340.0, 1, false); // Sun
-  sim.add_particle({ 149.6e6,0,0 }, { 0,29.78,0 }, 3.003e-6 * 1.327e11, 6371.0, 2, false); // Earth
+  sim.add_particle({ 149.6e6,0,0 }, { 0,29.78,0 }, 398600, 6371.0, 2, false); // Earth
   // sim.add_particle({160.6e6,0,0}, {0,27.0,0}, 3.213e-7 * 1.327e11, 3389.5, 3, false); // Earth 2 for interaction testing
   sim.dt = 18. * 86400.; // 18 days
-  sim.step(sim.dt);
+  sim.integrate(365. * 86400.);
   Vec3 pos = particles[1].pos();
   Vec3 vel = particles[1].vel();
   Vec3 acc = particles[1].acc();

@@ -58,7 +58,7 @@ namespace rebound {
         to.mus[i] = mu;
         to.positions[i] = from.positions[i] - ei * s_pos;
         to.velocities[i] = from.velocities[i] - ei * s_vel;
-        to.accelerations[i] = from.test_mass[i] ? Vec3(0.0,0.0,0.0) : (from.accelerations[i] - ei * s_acc);
+        to.accelerations[i] = from.test_mass[i] ? Vec3(0.0, 0.0, 0.0) : (from.accelerations[i] - ei * s_acc);
 
         if (!from.test_mass[i]) {
           eta += mu;
@@ -79,7 +79,7 @@ namespace rebound {
         double ei = 1.0 / eta;
         double mu = from.mus[i];
 
-        to.accelerations[i] = from.test_mass[i] ? Vec3(0.0,0.0,0.0) : (from.accelerations[i] - ei * s_acc);
+        to.accelerations[i] = from.test_mass[i] ? Vec3(0.0, 0.0, 0.0) : (from.accelerations[i] - ei * s_acc);
 
         if (!from.test_mass[i]) {
           eta += mu;
@@ -92,16 +92,18 @@ namespace rebound {
     void jacobi_to_inertial_posvel(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
       double eta = from.mus[0];
+
       Vec3 s_pos = from.positions[0] * eta;
       Vec3 s_vel = from.velocities[0] * eta;
 
-      // Serial unwind from N-1 down to 1
-      for (size_t i = N; i-- > 1;) {
-        double ei = 1.0 / eta;
-        double mu = from.mus[i];
-
-        if (!from.test_mass[i]) {
-          // subtract contribution of this massive body and recover previous s_pos
+      for (size_t i = N - 1; i > 0; --i) {
+        if (from.test_mass[i]) {
+          double ei = 1.0 / eta;
+          to.positions[i] = from.positions[i] + (s_pos * ei);
+          to.velocities[i] = from.velocities[i] + (s_vel * ei);
+        } else {
+          double mu = from.mus[i];
+          double ei = 1.0 / eta;
           s_pos = (s_pos - mu * from.positions[i]) * ei;
           s_vel = (s_vel - mu * from.velocities[i]) * ei;
           to.positions[i] = from.positions[i] + s_pos;
@@ -109,74 +111,72 @@ namespace rebound {
           eta -= mu;
           s_pos *= eta;
           s_vel *= eta;
-        } else {
-          // test particle: simply copy
-          to.positions[i] = from.positions[i];
-          to.velocities[i] = from.velocities[i];
         }
       }
 
-      if (eta != 0.0) {
+      if (eta > 0.0) {
         double mi = 1.0 / eta;
         to.positions[0] = s_pos * mi;
         to.velocities[0] = s_vel * mi;
-      } else {
-        to.positions[0] = {};
-        to.velocities[0] = {};
       }
     }
 
     void jacobi_to_inertial_pos(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
       double eta = from.mus[0];
+
       Vec3 s_pos = from.positions[0] * eta;
 
-      for (size_t i = N; i-- > 1;) {
-        double ei = 1.0 / eta;
-        double mu = from.mus[i];
-
-        if (!from.test_mass[i]) {
+      for (size_t i = N - 1; i > 0; --i) {
+        if (from.test_mass[i]) {
+          double ei = 1.0 / eta;
+          to.positions[i] = from.positions[i] + (s_pos * ei);
+        } else {
+          double mu = from.mus[i];
+          double ei = 1.0 / eta;
           s_pos = (s_pos - mu * from.positions[i]) * ei;
           to.positions[i] = from.positions[i] + s_pos;
           eta -= mu;
           s_pos *= eta;
-        } else {
-          to.positions[i] = from.positions[i];
         }
+      }
+
+      if (eta > 0.0) {
+        double mi = 1.0 / eta;
+        to.positions[0] = s_pos * mi;
       }
 
       if (eta != 0.0) {
         double mi = 1.0 / eta;
         to.positions[0] = s_pos * mi;
       } else {
-        to.positions[0] = Vec3(0.0,0.0,0.0);
+        to.positions[0] = Vec3(0.0, 0.0, 0.0);
       }
     }
 
     void jacobi_to_inertial_acc(ParticleStore& to, const ParticleStore& from) {
       size_t N = from.size();
       double eta = from.mus[0];
-      Vec3 s_acc = from.accelerations[0] * eta;
 
-      for (size_t i = N; i-- > 1;) {
-        double ei = 1.0 / eta;
-        double mu = from.mus[i];
+      Vec3 s_acc = from.positions[0] * eta;
 
-        if (!from.test_mass[i]) {
+      for (size_t i = N - 1; i > 0; --i) {
+        if (from.test_mass[i]) {
+          double ei = 1.0 / eta;
+          to.accelerations[i] = from.accelerations[i] + (s_acc * ei);
+        } else {
+          double mu = from.mus[i];
+          double ei = 1.0 / eta;
           s_acc = (s_acc - mu * from.accelerations[i]) * ei;
           to.accelerations[i] = from.accelerations[i] + s_acc;
           eta -= mu;
           s_acc *= eta;
-        } else {
-          to.accelerations[i] = from.accelerations[i];
         }
       }
 
-      if (eta != 0.0) {
+      if (eta > 0.0) {
         double mi = 1.0 / eta;
         to.accelerations[0] = s_acc * mi;
-      } else {
-        to.accelerations[0] = Vec3(0.0,0.0,0.0);
       }
     }
 
@@ -191,7 +191,7 @@ namespace rebound {
       double v0y = from.velocities[0].y * from.mus[0];
       double v0z = from.velocities[0].z * from.mus[0];
 
-      #pragma omp parallel for reduction(+: x0x, x0y, x0z, v0x, v0y, v0z, m0) schedule(static)
+#pragma omp parallel for reduction(+: x0x, x0y, x0z, v0x, v0y, v0z, m0) schedule(static)
       for (size_t i = 1; i < N; ++i) {
         if (!from.test_mass[i]) {
           double mi = from.mus[i];
@@ -214,11 +214,11 @@ namespace rebound {
       to.mus[0] = m0;
 
       // per-particle (embarrassingly parallel)
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (size_t i = 1; i < N; ++i) {
-        to.positions[i]  = from.positions[i] - com_pos;
+        to.positions[i] = from.positions[i] - com_pos;
         to.velocities[i] = from.velocities[i] - com_vel;
-        to.mus[i]        = from.mus[i];
+        to.mus[i] = from.mus[i];
       }
     }
 
@@ -228,7 +228,7 @@ namespace rebound {
 
       // accumulate x0 = sum(mi * positions_i / mtot) over real masses
       double x0x = 0.0, x0y = 0.0, x0z = 0.0;
-      #pragma omp parallel for reduction(+: x0x, x0y, x0z) schedule(static)
+#pragma omp parallel for reduction(+: x0x, x0y, x0z) schedule(static)
       for (size_t i = 1; i < N; ++i) {
         if (!from.test_mass[i] && mtot != 0.0) {
           double factor = from.mus[i] / mtot;
@@ -242,7 +242,7 @@ namespace rebound {
       Vec3 x0(x0x, x0y, x0z);
       to.positions[0] = from.positions[0] - x0;
 
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (size_t i = 1; i < N; ++i) {
         to.positions[i] = from.positions[i] + to.positions[0];
         to.mus[i] = from.mus[i];
@@ -254,7 +254,7 @@ namespace rebound {
       democraticheliocentric_to_inertial_pos(to, from);
 
       // velocities: per-particle addition
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (size_t i = 1; i < N; ++i) {
         to.velocities[i] = from.velocities[i] + from.velocities[0];
       }
@@ -263,7 +263,7 @@ namespace rebound {
       double mtot = from.mus[0];
       double v0x = 0.0, v0y = 0.0, v0z = 0.0;
       if (mtot != 0.0) {
-        #pragma omp parallel for reduction(+: v0x, v0y, v0z) schedule(static)
+#pragma omp parallel for reduction(+: v0x, v0y, v0z) schedule(static)
         for (size_t i = 1; i < N; ++i) {
           if (!from.test_mass[i]) {
             double f = from.mus[i] / mtot;
@@ -292,7 +292,7 @@ namespace rebound {
       double v0y = from.velocities[0].y * from.mus[0];
       double v0z = from.velocities[0].z * from.mus[0];
 
-      #pragma omp parallel for reduction(+: x0x, x0y, x0z, v0x, v0y, v0z, m0) schedule(static)
+#pragma omp parallel for reduction(+: x0x, x0y, x0z, v0x, v0y, v0z, m0) schedule(static)
       for (size_t i = 1; i < N; ++i) {
         if (!from.test_mass[i]) {
           double mi = from.mus[i];
@@ -315,19 +315,19 @@ namespace rebound {
 
       // massive particles (1..n_real-1)
       size_t nreal = from.n_real();
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (size_t i = 1; i < nreal; ++i) {
         double mi = from.mus[i];
         double mf = (m0 + mi) / m0; // safe because m0>0 for sane systems
-        to.positions[i]  = from.positions[i] - from.positions[0];
+        to.positions[i] = from.positions[i] - from.positions[0];
         to.velocities[i] = mf * (from.velocities[i] - from.velocities[0]);
         to.mus[i] = mi;
       }
 
       // test particles (n_real .. N-1)
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (size_t i = nreal; i < N; ++i) {
-        to.positions[i]  = from.positions[i] - from.positions[0];
+        to.positions[i] = from.positions[i] - from.positions[0];
         to.velocities[i] = from.velocities[i] - com_vel;
         to.mus[i] = from.mus[i];
       }
@@ -344,7 +344,7 @@ namespace rebound {
 
       double m0 = from.mus[0];
 
-      #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
       for (size_t i = 1; i < N; ++i) {
         if (!from.test_mass[i]) {
           double mi = from.mus[i];
@@ -357,7 +357,7 @@ namespace rebound {
 
       // compute correction v0 term
       double v0x = 0.0, v0y = 0.0, v0z = 0.0;
-      #pragma omp parallel for reduction(+: v0x, v0y, v0z) schedule(static)
+#pragma omp parallel for reduction(+: v0x, v0y, v0z) schedule(static)
       for (size_t i = 1; i < from.n_real(); ++i) {
         if (!from.test_mass[i]) {
           double mi = from.mus[i];
@@ -387,7 +387,7 @@ namespace rebound {
       double s_vel_x = 0.0, s_vel_y = 0.0, s_vel_z = 0.0;
       double s_m = 0.0;
 
-      #pragma omp parallel for reduction(+: s_pos_x, s_pos_y, s_pos_z, s_vel_x, s_vel_y, s_vel_z, s_m) schedule(static)
+#pragma omp parallel for reduction(+: s_pos_x, s_pos_y, s_pos_z, s_vel_x, s_vel_y, s_vel_z, s_m) schedule(static)
       for (size_t i = 1; i < N; ++i) {
         to.positions[i] = from.positions[i] + from.positions[0];
         to.velocities[i] = from.velocities[i] + from.velocities[0];
@@ -428,7 +428,7 @@ namespace rebound {
       double s_pos_x = 0.0, s_pos_y = 0.0, s_pos_z = 0.0;
       double s_m = 0.0;
 
-      #pragma omp parallel for reduction(+: s_pos_x, s_pos_y, s_pos_z, s_m) schedule(static)
+#pragma omp parallel for reduction(+: s_pos_x, s_pos_y, s_pos_z, s_m) schedule(static)
       for (size_t i = 1; i < N; ++i) {
         to.positions[i] = from.positions[i] + from.positions[0];
         if (!from.test_mass[i]) {
@@ -461,7 +461,7 @@ namespace rebound {
       double s_acc_x = 0.0, s_acc_y = 0.0, s_acc_z = 0.0;
       double s_m = 0.0;
 
-      #pragma omp parallel for reduction(+: s_acc_x, s_acc_y, s_acc_z, s_m) schedule(static)
+#pragma omp parallel for reduction(+: s_acc_x, s_acc_y, s_acc_z, s_m) schedule(static)
       for (size_t i = 1; i < N; ++i) {
         to.accelerations[i] = from.accelerations[i] + from.accelerations[0];
         if (!from.test_mass[i]) {
@@ -497,7 +497,7 @@ namespace rebound {
       double s_vel_x = 0.0, s_vel_y = 0.0, s_vel_z = 0.0;
       double s_m = 0.0;
 
-      #pragma omp parallel for reduction(+: s_pos_x, s_pos_y, s_pos_z, s_vel_x, s_vel_y, s_vel_z, s_m) schedule(static)
+#pragma omp parallel for reduction(+: s_pos_x, s_pos_y, s_pos_z, s_vel_x, s_vel_y, s_vel_z, s_m) schedule(static)
       for (size_t i = 1; i < N; ++i) {
         to.positions[i] = from.positions[i] - from.positions[0];
         to.velocities[i] = from.velocities[i] - from.velocities[0];

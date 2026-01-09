@@ -1,6 +1,0 @@
-option(
-  'openmp',
-  type : 'boolean',
-  value : false,
-  description : 'Enable OpenMP'
-)
