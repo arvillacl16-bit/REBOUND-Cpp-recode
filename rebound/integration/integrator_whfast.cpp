@@ -752,8 +752,6 @@ namespace rebound {
       _whfast::kepler_step(particles, *this, dt);
       _whfast::com_step(internals.p_jh, dt);
     }
-
-    to_inertial(particles);
   }
 
   void WHFast::synchronize(ParticleStore& particles, double dt) {

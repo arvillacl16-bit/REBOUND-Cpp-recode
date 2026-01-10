@@ -96,7 +96,7 @@ namespace rebound {
       Vec3 s_pos = from.positions[0] * eta;
       Vec3 s_vel = from.velocities[0] * eta;
 
-      for (size_t i = N - 1; i > 0; --i) {
+      for (size_t i = N - 1; i-- > 0;) {
         if (from.test_mass[i]) {
           double ei = 1.0 / eta;
           to.positions[i] = from.positions[i] + (s_pos * ei);
@@ -127,7 +127,7 @@ namespace rebound {
 
       Vec3 s_pos = from.positions[0] * eta;
 
-      for (size_t i = N - 1; i > 0; --i) {
+      for (size_t i = N - 1; i-- > 0;) {
         if (from.test_mass[i]) {
           double ei = 1.0 / eta;
           to.positions[i] = from.positions[i] + (s_pos * ei);
@@ -160,7 +160,7 @@ namespace rebound {
 
       Vec3 s_acc = from.positions[0] * eta;
 
-      for (size_t i = N - 1; i > 0; --i) {
+      for (size_t i = N - 1; i-- > 0;) {
         if (from.test_mass[i]) {
           double ei = 1.0 / eta;
           to.accelerations[i] = from.accelerations[i] + (s_acc * ei);

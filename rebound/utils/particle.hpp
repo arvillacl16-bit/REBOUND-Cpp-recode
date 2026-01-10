@@ -2,33 +2,51 @@
  * This file is part of the C++ translation of REBOUND.
  *
  * Original REBOUND (C) code by Hanno Rein and others.
- * This translation is licensed under the GNU General Public License v3 or later.
+ * This translation is licensed under the GNU General Public License v3 or
+ * later.
  *
- * REBOUND is free software: you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * REBOUND is free software: you can redistribute it and/or modify it under the
+ * terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
  *
  * REBOUND is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along with this program.
- * If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #pragma once
-#include "vec.hpp"
-#include <cstdint>
-#include "../repstl/vector"
-#include "../repstl/string"
 #include "../repstl/pair"
+#include "../repstl/string"
+#include "../repstl/vector"
+#include "vec.hpp"
+#include <cassert>
+#include <cstdint>
 
 namespace rebound {
   struct ind_Particle;
   class Particle;
+  class ConstParticle;
 
   template <typename T>
-  using ExtParamMap = repstl::Vector<repstl::pair<repstl::String, repstl::Vector<T>>>;
+  using ExtParamMap =
+    repstl::Vector<repstl::pair<repstl::String, repstl::Vector<T>>>;
+
+  template <typename T>
+  repstl::Vector<T>& get(ExtParamMap<T>& map, repstl::String param) {
+    for (size_t i = 0; i < map.size(); ++i) {
+      if (map[i].first == param)
+        return map[i].second;
+    }
+    repstl::String msg("Cannot find parameter: ");
+    msg += param;
+    throw repstl::RuntimeError(msg.c_str());
+  }
+
   struct ParticleStore {
     repstl::Vector<Vec3> positions;
     repstl::Vector<Vec3> velocities;
@@ -45,39 +63,28 @@ namespace rebound {
     ExtParamMap<uint32_t> hash_params;
     ExtParamMap<int> int_params;
 
-    void reserve_double_ex_params(const repstl::Vector<repstl::String>& names);
-    void reserve_int_ex_params(const repstl::Vector<repstl::String>& names);
-    void reserve_hash_ex_params(const repstl::Vector<repstl::String>& names);
-
-    void reserve_double_ex_param(const repstl::String& name);
-    void reserve_int_ex_param(const repstl::String& name);
-    void reserve_hash_ex_param(const repstl::String& name);
-
     ParticleStore(size_t capacity = 0);
 
     size_t size() const;
     size_t n_real() const;
 
-    Particle add_particle(const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass = false);
+    Particle add_particle(const Vec3& position, const Vec3& velocity, double mu,
+      double radius, uint32_t id, bool test_mass = false);
     void remove_particle(size_t idx);
 
     Particle operator[](size_t idx);
-    const Particle operator[](size_t idx) const;
+    ConstParticle operator[](size_t idx) const;
 
     void print_if_nan_or_inf() const;
 
-    inline bool operator==(const ParticleStore& other) {
-      return positions == other.positions
-        && velocities == other.velocities
-        && accelerations == other.accelerations
-        && gravity_cs == other.gravity_cs
-        && mus == other.mus
-        && radii == other.radii
-        && ids == other.ids
-        && test_mass == other.test_mass
-        && double_params == other.double_params
-        && int_params == other.int_params
-        && hash_params == other.hash_params;
+    inline bool operator==(const ParticleStore& other) const {
+      return positions == other.positions && velocities == other.velocities &&
+        accelerations == other.accelerations &&
+        gravity_cs == other.gravity_cs && mus == other.mus &&
+        radii == other.radii && ids == other.ids &&
+        test_mass == other.test_mass &&
+        double_params == other.double_params &&
+        int_params == other.int_params && hash_params == other.hash_params;
     }
   };
 
@@ -85,65 +92,113 @@ namespace rebound {
   private:
     size_t index;
     uint32_t version;
-    ParticleStore& store;
-    Particle(size_t idx, ParticleStore& store_) : index(idx), store(store_) {}
+    ParticleStore* store;
+    Particle(size_t idx, ParticleStore* store_, uint32_t ver)
+      : index(idx), store(store_), version(ver) {
+    }
+
   public:
-    Particle(ParticleStore& store_, const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass = false);
+#define CHECK_VER assert(store->versions[index] == version)
+    Vec3& pos() {
+      CHECK_VER;
+      return store->positions[index];
+    }
+    Vec3& vel() {
+      CHECK_VER;
+      return store->velocities[index];
+    }
+    Vec3& acc() {
+      CHECK_VER;
+      return store->accelerations[index];
+    }
+    double& mu() {
+      CHECK_VER;
+      return store->mus[index];
+    }
+    double& radius() {
+      CHECK_VER;
+      return store->radii[index];
+    }
+    void toggle_test_mass() {
+      CHECK_VER;
+      store->test_mass[index] = !store->test_mass[index];
+    }
 
-    Vec3& pos();
-    Vec3& vel();
-    Vec3& acc();
-    double& mu();
-    double& radius();
-    uint32_t& id();
-    void toggle_test_mass();
-
-    const Vec3& pos() const;
-    const Vec3& vel() const;
-    const Vec3& acc() const;
-    const double& mu() const;
-    const double& radius() const;
-    const uint32_t& id() const;
-    const bool& get_test_mass() const;
-
-    ind_Particle snap() const;
+    const Vec3& pos() const {
+      CHECK_VER;
+      return store->positions[index];
+    }
+    const Vec3& vel() const {
+      CHECK_VER;
+      return store->velocities[index];
+    }
+    const Vec3& acc() const {
+      CHECK_VER;
+      return store->accelerations[index];
+    }
+    const double& mu() const {
+      CHECK_VER;
+      return store->mus[index];
+    }
+    const double& radius() const {
+      CHECK_VER;
+      return store->radii[index];
+    }
+    const uint32_t& id() const {
+      CHECK_VER;
+      return store->ids[index];
+    }
+    const bool& get_test_mass() const {
+      CHECK_VER;
+      return store->test_mass[index];
+    }
+#undef CHECK_VER
 
     friend ParticleStore;
   };
 
-  struct Orbit {
-    double a;
-    double e;
-    double inc;
-    double Omega;
-    double omega;
-    double f;
-
-    Orbit(double a_, double e_, double inc_, double Omega_, double omega_, double f_)
-      : a(a_), e(e_), inc(inc_), Omega(Omega_), omega(omega_), f(f_) {
+  class ConstParticle {
+  private:
+    size_t index;
+    uint32_t version;
+    const ParticleStore* store;
+    ConstParticle(const size_t idx, const ParticleStore* store_,
+      const uint32_t ver)
+      : index(idx), store(store_), version(ver) {
     }
 
-    static Orbit from_particles(const Particle& primary, const Particle& secondary);
-
-    static double M_to_E(double M, double e, double tol = 1e-10);
-    static double E_to_f(double E, double e);
-    static double M_to_f(double M, double e, double tol = 1e-10);
-  };
-
-  struct ind_Particle {
-    Vec3 pos;
-    Vec3 vel;
-    double mu;
-    double r;
-    uint32_t id;
-    bool test_mass;
-
-    ind_Particle() : pos(), vel(), mu(0), r(0), id(0), test_mass(false) {}
-    ind_Particle(const Vec3& p, const Vec3& v, double mu_, double r_, uint32_t id_, bool test_mass_ = false)
-      : pos(p), vel(v), mu(mu_), r(r_), id(id_), test_mass(test_mass_) {
+  public:
+#define CHECK_VER assert(store->versions[index] == version)
+    const Vec3& pos() const {
+      CHECK_VER;
+      return store->positions[index];
     }
-    ind_Particle(const Particle& p) : pos(p.pos()), vel(p.vel()), mu(p.mu()), r(p.radius()), id(p.id()), test_mass(p.get_test_mass()) {}
+    const Vec3& vel() const {
+      CHECK_VER;
+      return store->velocities[index];
+    }
+    const Vec3& acc() const {
+      CHECK_VER;
+      return store->accelerations[index];
+    }
+    const double& mu() const {
+      CHECK_VER;
+      return store->mus[index];
+    }
+    const double& radius() const {
+      CHECK_VER;
+      return store->radii[index];
+    }
+    const uint32_t& id() const {
+      CHECK_VER;
+      return store->ids[index];
+    }
+    const bool& get_test_mass() const {
+      CHECK_VER;
+      return store->test_mass[index];
+    }
+#undef CHECK_VER
 
-    static ind_Particle from_orbit(const Orbit& orbit, const Particle& primary, const Particle& secondary, uint32_t id, bool test_mass = false);
+    friend ParticleStore;
   };
-}
+} // namespace rebound
