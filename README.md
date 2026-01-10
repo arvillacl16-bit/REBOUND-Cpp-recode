@@ -16,9 +16,11 @@ Run
 ```sh
 git clone https://github.com/arvillacl16-bit/REBOUND-Cpp-recode
 cd REBOUND-Cpp-recode
-meson setup ./build
-meson compile -C ./build
+meson setup builddir -Dopenmp=
+meson compile -C builddir
 ```
+
+`sh -Dopenmp=true` will build the library to use OpenMP, and `sh -Dopenmp=false` will build the library to not use OpenMP.
 
 The static library will be located at ./build/rebound/librebound.a.
 
