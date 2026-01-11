@@ -16,9 +16,9 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rebound.hpp"
+#include "../rebound.hpp"
 #include <chrono>
-#include <unordered_set>
+#include <unordered_map>
 
 namespace chrono = std::chrono;
 
@@ -28,18 +28,18 @@ namespace rebound {
   };
 
   Simulation::Simulation() : ptr_hash(new hashmap) {}
-  Simulation::Simulation(const Simulation &other)
-   : ptr_hash(new hashmap), 
-     do_integration(other.do_integration), do_collisions(other.do_collisions), do_boundaries(other.do_boundaries) {
-    auto &parts = other.particles;
+  Simulation::Simulation(const Simulation& other)
+    : ptr_hash(new hashmap),
+    do_integration(other.do_integration), do_collisions(other.do_collisions), do_boundaries(other.do_boundaries) {
+    auto& parts = other.particles;
     for (size_t i = 0; i < parts.size(); ++i) add_particle(parts.positions[i], parts.velocities[i], parts.mus[i], parts.radii[i], parts.ids[i], parts.test_mass[i]);
   }
 
-  Simulation::Simulation(Simulation &&other)
-   : ptr_hash(other.ptr_hash), do_integration(other.do_integration), do_boundaries(other.do_boundaries), do_collisions(other.do_collisions),
-     integrator(other.integrator), coll_handler(other.coll_handler), bound_handler(other.bound_handler) { 
+  Simulation::Simulation(Simulation&& other)
+    : ptr_hash(other.ptr_hash), do_integration(other.do_integration), do_boundaries(other.do_boundaries), do_collisions(other.do_collisions),
+    integrator(other.integrator), coll_handler(other.coll_handler), bound_handler(other.bound_handler) {
     other.ptr_hash = nullptr;
-    other.do_integration = false; 
+    other.do_integration = false;
     other.do_boundaries = false;
     other.do_collisions = false;
     other.integrator = nullptr;
@@ -47,14 +47,14 @@ namespace rebound {
     other.bound_handler = nullptr;
   }
 
-  Simulation &Simulation::operator=(const Simulation &other) {
+  Simulation& Simulation::operator=(const Simulation& other) {
     ptr_hash->hash_map.clear();
-    auto &parts = other.particles;
+    auto& parts = other.particles;
     for (size_t i = 0; i < parts.size(); ++i) add_particle(parts.positions[i], parts.velocities[i], parts.mus[i], parts.radii[i], parts.ids[i], parts.test_mass[i]);
     return *this;
   }
 
-  Simulation &Simulation::operator=(Simulation &&other) { 
+  Simulation& Simulation::operator=(Simulation&& other) {
     if (this == &other) return *this;
 
     delete ptr_hash;
@@ -63,7 +63,7 @@ namespace rebound {
     delete bound_handler;
 
     ptr_hash = other.ptr_hash;
-    other.ptr_hash = nullptr; 
+    other.ptr_hash = nullptr;
 
     do_integration = other.do_integration; other.do_integration = false;
     do_collisions = other.do_collisions; other.do_collisions = false;
@@ -76,23 +76,23 @@ namespace rebound {
     return *this;
   }
 
-  Simulation::~Simulation() { 
-    delete ptr_hash; 
+  Simulation::~Simulation() {
+    delete ptr_hash;
     delete integrator;
     delete coll_handler;
     delete bound_handler;
   }
 
   Particle Simulation::add_particle(const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass) {
-    ptr_hash->hash_map.emplace(id,curr_idx++);
+    ptr_hash->hash_map.emplace(id, curr_idx++);
     return particles.add_particle(position, velocity, mu, radius, id, test_mass);
   }
 
   void Simulation::remove_particle(size_t idx) {
     if (idx >= n()) throw std::out_of_range("Index outside of simulation");
-    auto &hash_map = ptr_hash->hash_map;
-    size_t last_idx = n() - 1; 
-    uint32_t last_id = particles.ids[last_idx]; 
+    auto& hash_map = ptr_hash->hash_map;
+    size_t last_idx = n() - 1;
+    uint32_t last_id = particles.ids[last_idx];
     if (idx != last_idx) {
       hash_map[last_id] = idx;
       hash_map.erase(particles.ids[idx]);
@@ -102,12 +102,12 @@ namespace rebound {
   }
 
   void Simulation::remove_particle(uint32_t id) {
-    auto &hash_map = ptr_hash->hash_map;
+    auto& hash_map = ptr_hash->hash_map;
     if (auto it = hash_map.find(id); it != hash_map.end()) remove_particle(it->second);
   }
 
-  void Simulation::set_particles(const ParticleStore &particles_) {
-    auto &map = ptr_hash->hash_map;
+  void Simulation::set_particles(const ParticleStore& particles_) {
+    auto& map = ptr_hash->hash_map;
     map.clear();
     particles = particles_;
     for (size_t i = 0; i < particles.size(); ++i) map[particles.ids[i]] = i;
@@ -134,7 +134,7 @@ namespace rebound {
   bool Simulation::step(double dt_) {
     bool val = false;
 
-    if (do_collisions && coll_handler) if (CollisionLine *line_coll = dynamic_cast<CollisionLine*>(coll_handler)) line_coll->prev_pos = particles.positions;
+    if (do_collisions && coll_handler) if (CollisionLine* line_coll = dynamic_cast<CollisionLine*>(coll_handler)) line_coll->prev_pos = particles.positions;
     if (do_integration && integrator) integrator->step(particles, dt_);
     t += dt_;
 
@@ -145,8 +145,8 @@ namespace rebound {
   }
 
   Vec3 Simulation::com_pos() {
-    repstl::Vector<Vec3> &positions = particles.positions;
-    repstl::Vector<double> &mus = particles.mus;
+    repstl::Vector<Vec3>& positions = particles.positions;
+    repstl::Vector<double>& mus = particles.mus;
     if (positions.size() != n() || mus.size() != n()) return {};
 
     double total_mu = 0;
@@ -162,8 +162,8 @@ namespace rebound {
   }
 
   Vec3 Simulation::com_vel() {
-    repstl::Vector<Vec3> &velocities = particles.velocities;
-    repstl::Vector<double> &mus = particles.mus;
+    repstl::Vector<Vec3>& velocities = particles.velocities;
+    repstl::Vector<double>& mus = particles.mus;
     if (velocities.size() != n() || mus.size() != n()) return {};
 
     double total_mu = 0;

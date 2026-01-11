@@ -16,16 +16,17 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rebound.hpp"
+#include "../rebound.hpp"
 #include <fstream>
 #include <filesystem>
 
 namespace fs = std::filesystem;
 
 namespace rebound {
-  Simulation::Simulation(const repstl::String &filename) {
-    std::string fname(filename.len(), '\0');
-    for (size_t i = 0; i < filename.len(); ++i) fname += filename[i];
+  Simulation::Simulation(const repstl::String& filename) {
+    std::string fname;
+    fname.resize(filename.len());
+    for (size_t i = 0; i < filename.len(); ++i) fname[i] = filename[i];
     std::ifstream infile(fname, std::ios_base::binary);
     if (!infile.is_open()) throw std::runtime_error(("Could not open file: " + filename).c_str());
     infile.read(reinterpret_cast<char*>(&t), sizeof(double));
@@ -48,9 +49,10 @@ namespace rebound {
     for (size_t i = 0; i < n_particles; ++i) infile.read(reinterpret_cast<char*>(&particles.versions[i]), sizeof(uint32_t));
   }
 
-  void Simulation::save(const repstl::String &filename) const {
-    std::string fname(filename.len(), '\0');
-    for (size_t i = 0; i < filename.len(); ++i) fname += filename[i];
+  void Simulation::save(const repstl::String& filename) const {
+    std::string fname;
+    fname.resize(filename.len());
+    for (size_t i = 0; i < filename.len(); ++i) fname[i] = filename[i];
     if (fs::exists(fname)) throw repstl::RuntimeError(("File already exists: " + filename).c_str());
     if (!fs::path(fname).has_parent_path()) {
       fs::create_directories(fs::path(fname).parent_path());
