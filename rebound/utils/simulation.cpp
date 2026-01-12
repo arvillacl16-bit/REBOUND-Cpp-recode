@@ -87,6 +87,7 @@ namespace rebound {
     auto& map = ptr_hash->hash_map;
     map.clear();
     for (size_t i = 0; i < particles.size(); ++i) map[particles.ids[i]] = i;
+    curr_idx = particles.size();
   }
 
   Particle Simulation::add_particle(const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass) {

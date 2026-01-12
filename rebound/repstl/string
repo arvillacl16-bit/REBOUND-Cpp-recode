@@ -78,10 +78,13 @@ namespace rebound::repstl {
 
     bool is_empty() const { return length == 0; }
 
-    char* begin() { return data ? data : const_cast<char*>(""); }
-    char* end() { return begin() + length + 1; }
+    char* begin() {
+      static char kEmpty = '\0';
+      return data ? data : &kEmpty;
+    }
+    char* end() { return begin() + length; }
     const char* cbegin() const { return data ? data : ""; }
-    const char* cend() const { return cbegin() + length + 1; }
+    const char* cend() const { return cbegin() + length; }
 
     String operator+(const String& other) const;
     String operator+(const char* str) const;
@@ -91,18 +94,18 @@ namespace rebound::repstl {
 
   inline String operator+(const char* lhs, const String& rhs) { return String(lhs) + rhs; }
 
-  String stoull(unsigned long long val);
+  String ull_to_string(unsigned long long val);
 
-  inline String stoll(long long val) {
+  inline String ll_to_string(long long val) {
     if (val == 0) return "0";
-    else if (val < 0) return "-" + stoull(-val);
-    else return stoull(val);
+    else if (val < 0) return "-" + ull_to_string(static_cast<unsigned long long>(~val) + 1);
+    else return ull_to_string(val);
   }
 
-  inline String stoul(unsigned long val) { return stoull(val); }
-  inline String stol(long val) { return stoll(val); }
-  inline String stoui(unsigned int val) { return stoull(val); }
-  inline String stoi(int val) { return stoll(val); }
-  inline String stous(unsigned short val) { return stoull(val); }
-  inline String stos(short val) { return stoll(val); }
+  inline String ul_to_string(unsigned long val) { return ull_to_string(val); }
+  inline String l_to_string(long val) { return ll_to_string(val); }
+  inline String ui_to_string(unsigned int val) { return ull_to_string(val); }
+  inline String i_to_string(int val) { return ll_to_string(val); }
+  inline String us_to_string(unsigned short val) { return ull_to_string(val); }
+  inline String s_to_string(short val) { return ll_to_string(val); }
 }

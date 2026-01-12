@@ -73,20 +73,20 @@ namespace rebound {
 
     template <typename collision_tp>
     collision_tp& set_collision_handler() {
-      do_integration = false;
-      collision_tp* new_integator = new collision_tp;
-      delete integrator;
-      integrator = new_integator;
-      return static_cast<collision_tp&>(*integrator);
+      do_collisions = true;
+      collision_tp* new_coll_handler = new collision_tp;
+      delete coll_handler;
+      coll_handler = new_coll_handler;
+      return static_cast<collision_tp&>(*coll_handler);
     }
 
     template <typename boundary_tp>
     boundary_tp& set_boundary_handler() {
-      do_boundaries = false;
-      boundary_tp* new_integrator = new boundary_tp;
-      delete integrator;
-      integrator = new_integrator;
-      return static_cast<boundary_tp&>(*integrator);
+      do_boundaries = true;
+      boundary_tp* new_bound_handler = new boundary_tp;
+      delete bound_handler;
+      bound_handler = new_bound_handler;
+      return static_cast<boundary_tp&>(*bound_handler);
     }
 
     inline void set_integrator_none() { do_integration = false; }

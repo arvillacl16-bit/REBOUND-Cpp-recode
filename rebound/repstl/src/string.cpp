@@ -37,11 +37,16 @@ namespace rebound::repstl {
   }
 
   String::String(const String& other) {
-    length = other.length;
-    cap = other.cap;
-    data = new char[cap + 1];
-    if (other.data) std::strcpy(data, other.data);
-    else data[0] = '\0';
+    if (other.data) {
+      length = other.length;
+      cap = other.cap;
+      data = new char[cap + 1];
+      std::strcpy(data, other.data);
+    } else {
+      data = nullptr;
+      length = 0;
+      cap = 0;
+    }
   }
 
   String& String::operator=(const String& other) {
@@ -162,7 +167,7 @@ namespace rebound::repstl {
     return res;
   }
 
-  String stoull(unsigned long long val) {
+  String ull_to_string(unsigned long long val) {
     if (val == 0) return "0";
     String res;
 

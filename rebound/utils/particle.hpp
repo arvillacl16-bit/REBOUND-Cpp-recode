@@ -99,7 +99,7 @@ namespace rebound {
 
     void check_ver() const {
       if (version != store->versions[index]) {
-        throw repstl::RuntimeError(("Stale particle handle: invalid version at index " + repstl::stoull(index)).c_str());
+        throw repstl::RuntimeError(("Stale particle handle: invalid version at index " + repstl::ull_to_string(index)).c_str());
       }
     }
 
@@ -173,7 +173,7 @@ namespace rebound {
 
     void check_ver() const {
       if (version != store->versions[index]) {
-        throw repstl::RuntimeError(("Stale particle handle: invalid version at index " + repstl::stoull(index)).c_str());
+        throw repstl::RuntimeError(("Stale particle handle: invalid version at index " + repstl::ull_to_string(index)).c_str());
       }
     }
 
