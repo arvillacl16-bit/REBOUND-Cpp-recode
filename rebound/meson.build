@@ -1,11 +1,11 @@
 # rebound/meson.build
 
 current_deps = []
+current_deps += repstl_dep
 if get_option('openmp')
   current_deps += omp_dep
 endif
 
-# These are your SOURCE files to be compiled
 rebound_sources = files(
   'integration/acceleration.cpp',
   'integration/integrator_leapfrog.cpp',
@@ -18,8 +18,6 @@ rebound_sources = files(
   'utils/transformations.cpp'
 )
 
-# This tells the compiler where to find your .hpp files
-# Assuming they are in the 'rebound' root and subfolders
 rebound_includes = include_directories('.', 'integration', 'non_integration', 'utils')
 
 rebound_lib = static_library(

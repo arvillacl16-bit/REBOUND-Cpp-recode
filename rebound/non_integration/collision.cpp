@@ -16,7 +16,7 @@
  * If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "rebound.hpp"
+#include "../rebound.hpp"
 #include <set>
 #include <algorithm>
 
@@ -24,13 +24,13 @@
 #define COMB_RAD2(i, j) (particles.radii[i] + particles.radii[j]) * (particles.radii[i] + particles.radii[j])
 
 namespace rebound {
-  void remove_particles_by_set(const std::set<size_t> indices, ParticleStore &particles) {
+  void remove_particles_by_set(const std::set<size_t> indices, ParticleStore& particles) {
     for (auto it = indices.rbegin(); it != indices.rend(); ++it) particles.remove_particle(*it);
   }
 
-  bool collision_direct(size_t i, size_t j, const ParticleStore &particles) { return particles.positions[i].distance2(particles.positions[j]) < COMB_RAD2(i, j); }
+  bool collision_direct(size_t i, size_t j, const ParticleStore& particles) { return particles.positions[i].distance2(particles.positions[j]) < COMB_RAD2(i, j); }
 
-  bool collision_line(size_t i, size_t j, const ParticleStore &particles, const repstl::Vector<Vec3> &prev_pos) {
+  bool collision_line(size_t i, size_t j, const ParticleStore& particles, const repstl::Vector<Vec3>& prev_pos) {
     Vec3 a = prev_pos[j] - prev_pos[i];
     Vec3 d = a - (particles.positions[j] - particles.positions[i]);
 
@@ -39,7 +39,7 @@ namespace rebound {
     return v.mag2() < COMB_RAD2(i, j);
   }
 
-  bool CollisionDirect::detect_collision(ParticleStore &particles) {
+  bool CollisionDirect::detect_collision(ParticleStore& particles) {
     bool val = false;
     if (handler) {
       std::set<size_t> indices;
@@ -47,19 +47,19 @@ namespace rebound {
       for (size_t i = 0; i < N; ++i) {
         for (size_t j = i + 1; j < N; ++j) {
           if (collision_direct(i, j, particles)) {
-            auto result = handler({i, j, &particles});
+            auto result = handler({ i, j, &particles });
             if (result.first) val = true;
             indices.insert(result.second.begin(), result.second.end());
           }
         }
       }
-      
+
       remove_particles_by_set(indices, particles);
     }
     return val;
   }
 
-  bool CollisionLine::detect_collision(ParticleStore &particles) {
+  bool CollisionLine::detect_collision(ParticleStore& particles) {
     bool val = false;
     if (handler) {
       std::set<size_t> indices;
@@ -67,22 +67,22 @@ namespace rebound {
       for (size_t i = 0; i < N; ++i) {
         for (size_t j = i + 1; j < N; ++j) {
           if (collision_line(i, j, particles, prev_pos)) {
-            auto result = handler({i, j, &particles});
+            auto result = handler({ i, j, &particles });
             if (result.first) val = true;
             indices.insert(result.second.begin(), result.second.end());
           }
         }
       }
-      
+
       remove_particles_by_set(indices, particles);
     }
     return val;
   }
   namespace collision_handlers {
-    repstl::pair<bool, repstl::Vector<size_t>> merge(const Collision &c) {
+    repstl::pair<bool, repstl::Vector<size_t>> merge(const Collision& c) {
       size_t i = c.p1_i;
       size_t j = c.p2_i;
-      ParticleStore &particles = *c.particles;
+      ParticleStore& particles = *c.particles;
       Vec3 pos_i = particles.positions[i];
       Vec3 pos_j = particles.positions[j];
       Vec3 vel_i = particles.velocities[i];
@@ -94,12 +94,12 @@ namespace rebound {
         particles.velocities[i] = (m_i * vel_i + m_j * vel_j) / m_tot;
         particles.positions[i] = (m_i * pos_i + m_j * pos_j) / m_tot;
         particles.mus[i] = m_tot;
-        return {false, {j}};
+        return { false, {j} };
       } else {
         particles.velocities[j] = (m_i * vel_i + m_j * vel_j) / m_tot;
         particles.positions[j] = (m_i * pos_i + m_j * pos_j) / m_tot;
         particles.mus[j] = m_tot;
-        return {false, {i}};
+        return { false, {i} };
       }
     }
   }

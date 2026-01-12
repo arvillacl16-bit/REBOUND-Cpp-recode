@@ -19,8 +19,6 @@
 #pragma once
 #include <stddef.h>
 #include <cstring>
-#include <cmath>
-#include "exception"
 
 namespace rebound::repstl {
   class String {
@@ -28,132 +26,44 @@ namespace rebound::repstl {
     char* data = nullptr;
     size_t length = 0;
     size_t cap = 0; // not including null terminator
-    static constexpr double GROW_FACTOR = 2;
+    static constexpr int GROW_FACTOR = 2;
 
-    size_t ceil(double x) {
+    inline size_t ceil(double x) {
       size_t int_part = (size_t)x;
       return (x == int_part) ? int_part : int_part + 1;
     }
 
-    void grow(size_t cap_, bool allow_shrink = false) {
-      if (cap_ == cap) return;
-      if (cap_ > cap || allow_shrink) {
-        size_t new_len = length > cap_ ? cap_ : length;
-        char* new_data = new char[cap_ + 1];
-        std::memcpy(new_data, data, new_len);
-        new_data[new_len] = '\0';
-        delete[] data;
-        data = new_data;
-        length = new_len;
-        cap = cap_;
-      }
-    }
+    void grow(size_t cap_, bool allow_shrink = false);
+    void ensure_capacity(size_t min_cap);
   public:
     String() : data(nullptr), length(0), cap(0) {}
-    String(const char* str) {
-      if (str) {
-        length = std::strlen(str);
-        cap = length;
-        data = new char[cap + 1];
-        std::strcpy(data, str);
-      } else {
-        data = nullptr;
-        length = 0;
-        cap = 0;
-      }
-    }
-    String(const String& other) {
-      length = other.length;
-      cap = other.cap;
-      data = new char[cap + 1];
-      if (other.data) std::strcpy(data, other.data);
-      else data[0] = '\0';
-    }
+    String(const char* str);
+    String(const String& other);
     String(String&& other) noexcept : data(other.data), length(other.length), cap(other.cap) {
       other.data = nullptr;
       other.length = 0;
       other.cap = 0;
     }
 
-    String& operator=(const String& other) {
-      if (this != &other) {
-        length = other.length;
-        cap = other.cap;
-        char* new_data = new char[cap + 1];
-        delete[] data;
-        data = new_data;
-        if (other.data) std::strcpy(data, other.data);
-        else data[0] = '\0';
-      }
-      return *this;
-    }
-
-    String& operator=(String&& other) noexcept {
-      if (this != &other) {
-        delete[] data;
-        data = other.data;
-        cap = other.cap;
-        length = other.length;
-        other.data = nullptr;
-        other.length = 0;
-        other.cap = 0;
-      }
-      return *this;
-    }
-
+    String& operator=(const String& other);
+    String& operator=(String&& other) noexcept;
     ~String() { delete[] data; }
-
     const char* c_str() const { return data ? data : ""; }
-
     const char& operator[](size_t index) const { return data[index]; }
     char& operator[](size_t index) { return data[index]; }
-
     void clear() {
       length = 0;
+      if (data) data[0] = '\0';
     }
 
-    void push_back(char c) {
-      if (length == cap) grow(ceil(cap * GROW_FACTOR));
-      data[length] = c;
-      data[length + 1] = '\0';
-      ++length;
-    }
-
-    void pop_back() {
-      if (length == 0) return;
-      --length;
-      data[length] = '\0';
-    }
-
-    void del_char_at(size_t index) {
-      if (index >= length) return;
-      std::memmove(data + index, data + index + 1, length - index);
-      --length;
-    }
-
+    void push_back(char c);
+    void pop_back();
+    void del_char_at(size_t index);
     size_t len() const { return length; }
+    void del_char(char c);
 
-    void del_char(char c) {
-      if (!data) return;
-      size_t new_length = 0;
-      for (size_t i = 0; i < length; ++i) {
-        if (data[i] != c) {
-          data[new_length++] = data[i];
-        }
-      }
-      data[new_length] = '\0';
-      length = new_length;
-    }
-
-    const char& at(size_t index) const {
-      if (index >= length) throw IndexOutOfBounds("Index out of range");
-      return data[index];
-    }
-
-    char& at(size_t index) {
-      if (index >= length) throw IndexOutOfBounds("Index out of range");
-      return data[index];
-    }
+    const char& at(size_t index) const;
+    char& at(size_t index);
 
     bool operator==(const String& other) const {
       if (length != other.length) return false;
@@ -168,192 +78,31 @@ namespace rebound::repstl {
 
     bool is_empty() const { return length == 0; }
 
-    char* begin() { return data; }
-    char* end() { return data + length; }
-    const char* cbegin() const { return data; }
-    const char* cend() const { return data + length; }
+    char* begin() { return data ? data : const_cast<char*>(""); }
+    char* end() { return begin() + length + 1; }
+    const char* cbegin() const { return data ? data : ""; }
+    const char* cend() const { return cbegin() + length + 1; }
 
-    String operator+(const String& other) const {
-      if (other.data == nullptr) return *this;
-      String result(*this);
-      for (size_t i = 0; i < other.length; ++i) result.push_back(other[i]);
-      return result;
-    }
-
-
-    String operator+(const char* str) const {
-      if (!str) return *this;
-      String result(*this);
-      size_t len = std::strlen(str);
-      for (size_t i = 0; i < len; ++i) result.push_back(str[i]);
-      return result;
-    }
-
-    String& operator+=(const String& other) {
-      if (other.data == nullptr) return *this;
-      for (size_t i = 0; i < other.length; ++i) push_back(other[i]);
-      return *this;
-    }
-
-    String& operator+=(const char* str) {
-      if (!str) return *this;
-      size_t len = std::strlen(str);
-      for (size_t i = 0; i < len; ++i) push_back(str[i]);
-      return *this;
-    }
+    String operator+(const String& other) const;
+    String operator+(const char* str) const;
+    String& operator+=(const String& other);
+    String& operator+=(const char* str);
   };
-
-  inline unsigned long long int_pow(unsigned long long base, unsigned long long exp) {
-    unsigned long long res = 1;
-    for (unsigned long long i = 0; i < exp; ++i) res *= base;
-    return res;
-  }
 
   inline String operator+(const char* lhs, const String& rhs) { return String(lhs) + rhs; }
 
-#pragma region string to int
-  inline String stoull(unsigned long long val) {
-    if (val == 0) return "0";
-    String res;
-
-    unsigned long long exp = 0;
-    while (val >= int_pow(10, exp)) ++exp;
-    while (exp > 0) {
-      --exp;
-      unsigned long long pow_of_10 = int_pow(10, exp);
-      int digit = val / pow_of_10;
-      val -= pow_of_10 * digit;
-      res.push_back('0' + digit);
-    }
-
-    return res;
-  }
+  String stoull(unsigned long long val);
 
   inline String stoll(long long val) {
     if (val == 0) return "0";
-    if (val < 0) return "-" + stoll(-val);
-
-    String res;
-
-    unsigned long long exp = 0;
-    while (val >= int_pow(10, exp)) ++exp;
-    while (exp > 0) {
-      --exp;
-      unsigned long long pow_of_10 = int_pow(10, exp);
-      int digit = val / pow_of_10;
-      val -= pow_of_10 * digit;
-      res.push_back('0' + digit);
-    }
-
-    return res;
+    else if (val < 0) return "-" + stoull(-val);
+    else return stoull(val);
   }
 
-  inline String stoul(unsigned long val) {
-    if (val == 0) return "0";
-    String res;
-
-    unsigned long long exp = 0;
-    while (val >= int_pow(10, exp)) ++exp;
-    while (exp > 0) {
-      --exp;
-      unsigned long long pow_of_10 = int_pow(10, exp);
-      int digit = val / pow_of_10;
-      val -= pow_of_10 * digit;
-      res.push_back('0' + digit);
-    }
-
-    return res;
-  }
-
-  inline String stol(long val) {
-    if (val == 0) return "0";
-    if (val < 0) return "-" + stol(-val);
-
-    String res;
-
-    unsigned long long exp = 0;
-    while (val >= int_pow(10, exp)) ++exp;
-    while (exp > 0) {
-      --exp;
-      unsigned long long pow_of_10 = int_pow(10, exp);
-      int digit = val / pow_of_10;
-      val -= pow_of_10 * digit;
-      res.push_back('0' + digit);
-    }
-
-    return res;
-  }
-
-  inline String stoui(unsigned int val) {
-    if (val == 0) return "0";
-    String res;
-
-    unsigned long long exp = 0;
-    while (val >= int_pow(10, exp)) ++exp;
-    while (exp > 0) {
-      --exp;
-      unsigned long long pow_of_10 = int_pow(10, exp);
-      int digit = val / pow_of_10;
-      val -= pow_of_10 * digit;
-      res.push_back('0' + digit);
-    }
-
-    return res;
-  }
-
-  inline String stoi(int val) {
-    if (val == 0) return "0";
-    if (val < 0) return "-" + stol(-val);
-
-    String res;
-
-    unsigned long long exp = 0;
-    while (val >= int_pow(10, exp)) ++exp;
-    while (exp > 0) {
-      --exp;
-      unsigned long long pow_of_10 = int_pow(10, exp);
-      int digit = val / pow_of_10;
-      val -= pow_of_10 * digit;
-      res.push_back('0' + digit);
-    }
-
-    return res;
-  }
-
-  inline String stous(unsigned short val) {
-    if (val == 0) return "0";
-    String res;
-
-    unsigned long long exp = 0;
-    while (val >= int_pow(10, exp)) ++exp;
-    while (exp > 0) {
-      --exp;
-      unsigned long long pow_of_10 = int_pow(10, exp);
-      int digit = val / pow_of_10;
-      val -= pow_of_10 * digit;
-      res.push_back('0' + digit);
-    }
-
-    return res;
-  }
-
-  inline String stos(short val) {
-    if (val == 0) return "0";
-    if (val < 0) return "-" + stol(-val);
-
-    String res;
-
-    unsigned long long exp = 0;
-    while (val >= int_pow(10, exp)) ++exp;
-    while (exp > 0) {
-      --exp;
-      unsigned long long pow_of_10 = int_pow(10, exp);
-      int digit = val / pow_of_10;
-      val -= pow_of_10 * digit;
-      res.push_back('0' + digit);
-    }
-
-    return res;
-  }
-#pragma endregion
+  inline String stoul(unsigned long val) { return stoull(val); }
+  inline String stol(long val) { return stoll(val); }
+  inline String stoui(unsigned int val) { return stoull(val); }
+  inline String stoi(int val) { return stoll(val); }
+  inline String stous(unsigned short val) { return stoull(val); }
+  inline String stos(short val) { return stoll(val); }
 }

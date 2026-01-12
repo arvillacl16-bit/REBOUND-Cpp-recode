@@ -64,7 +64,7 @@ int main() {
   using namespace rebound;
   Simulation sim;
   const ParticleStore& particles = sim.get_particles();
-  auto& whfast = sim.set_integrator_whfast();
+  auto& whfast = sim.set_integrator<WHFast>();
   whfast.gravity_method = GravityMethod::JACOBI;
   // whfast.coordinates = WHFast::Coordinates::WHDS;
   sim.add_particle({ 0,0,0 }, { 0,0,0 }, 1.327e11, 696340.0, 1, false); // Sun

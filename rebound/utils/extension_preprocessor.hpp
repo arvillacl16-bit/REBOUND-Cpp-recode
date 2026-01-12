@@ -19,16 +19,16 @@
 #ifndef FRIEND_PP_HPP
 #define FRIEND_PP_HPP
 
-/* --------------------------------
-   Minimal config
-   -------------------------------- */
+ /* --------------------------------
+    Minimal config
+    -------------------------------- */
 #define FRIEND_PP_VARIADICS 1
 
-/* --------------------------------
-   Helper macros
-   -------------------------------- */
+    /* --------------------------------
+       Helper macros
+       -------------------------------- */
 
-// Get first argument
+       // Get first argument
 #define FRIEND_PP_HEAD(x, ...) x
 // Get rest of arguments
 #define FRIEND_PP_TAIL(x, ...) __VA_ARGS__
@@ -40,7 +40,7 @@
    Recursive mapping
    -------------------------------- */
 
-// Expand macro for first argument
+   // Expand macro for first argument
 #define FRIEND_PP_MAP_1(M, x) M(x)
 
 // Expand macro for variadic arguments recursively
@@ -60,9 +60,9 @@
 #define FRIEND_CLASS(x) friend class x;
 #define FRIEND_FUNCTION(x) friend x;
 
-/* --------------------------------
-   User macros
-   -------------------------------- */
+   /* --------------------------------
+      User macros
+      -------------------------------- */
 
 #define ADD_FRIENDS_CLASS(...) FRIEND_PP_MAP(FRIEND_CLASS, __VA_ARGS__)
 #define ADD_FRIENDS_FUNC(...)  FRIEND_PP_MAP(FRIEND_FUNCTION, __VA_ARGS__)

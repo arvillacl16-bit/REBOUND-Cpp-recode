@@ -41,6 +41,8 @@ namespace rebound {
     bool do_collisions = false;
     bool do_boundaries = false;
 
+    void rehash_particles();
+
   public:
     double dt;
     bool (*heartbeat) (Simulation& sim) = nullptr; // If returns true, makes the integration terminate
@@ -60,71 +62,36 @@ namespace rebound {
     inline const ParticleStore& get_particles() const { return particles; }
     void set_particles(const ParticleStore& particles_);
 
+    template <typename integrator_tp>
+    integrator_tp& set_integrator() {
+      do_integration = false;
+      integrator_tp* new_integator = new integrator_tp;
+      delete integrator;
+      integrator = new_integator;
+      return static_cast<integrator_tp&>(*integrator);
+    }
+
+    template <typename collision_tp>
+    collision_tp& set_collision_handler() {
+      do_integration = false;
+      collision_tp* new_integator = new collision_tp;
+      delete integrator;
+      integrator = new_integator;
+      return static_cast<collision_tp&>(*integrator);
+    }
+
+    template <typename boundary_tp>
+    boundary_tp& set_boundary_handler() {
+      do_boundaries = false;
+      boundary_tp* new_integrator = new boundary_tp;
+      delete integrator;
+      integrator = new_integrator;
+      return static_cast<boundary_tp&>(*integrator);
+    }
+
     inline void set_integrator_none() { do_integration = false; }
-    inline WHFast& set_integrator_whfast() {
-      do_integration = true;
-      delete integrator;
-      integrator = new WHFast;
-      return (WHFast&)(*integrator);
-    }
-
-    inline Leapfrog& set_integrator_leapfrog() {
-      do_integration = true;
-      delete integrator;
-      integrator = new Leapfrog;
-      return (Leapfrog&)(*integrator);
-    }
-
-    inline Mercurius& set_integrator_mercurius() {
-      do_integration = true;
-      delete integrator;
-      integrator = new Mercurius;
-      return (Mercurius&)(*integrator);
-    }
-
-    inline IAS15& set_integrator_ias15() {
-      do_integration = true;
-      delete integrator;
-      integrator = new IAS15;
-      return (IAS15&)(*integrator);
-    }
-
     inline void set_collision_none() { do_collisions = false; }
-    inline CollisionDirect& set_collision_direct() {
-      do_collisions = true;
-      delete coll_handler;
-      coll_handler = new CollisionDirect;
-      return (CollisionDirect&)(*coll_handler);
-    }
-
-    inline CollisionLine& set_collision_line() {
-      do_collisions = true;
-      delete coll_handler;
-      coll_handler = new CollisionLine;
-      return (CollisionLine&)(*coll_handler);
-    }
-
     inline void set_boundary_none() { do_boundaries = false; }
-    inline BoundaryOpen& set_boundary_open() {
-      do_boundaries = true;
-      delete bound_handler;
-      bound_handler = new BoundaryOpen;
-      return (BoundaryOpen&)(*bound_handler);
-    }
-
-    inline BoundaryPeriodic& set_boundary_periodic() {
-      do_boundaries = true;
-      delete bound_handler;
-      bound_handler = new BoundaryPeriodic;
-      return (BoundaryPeriodic&)(*bound_handler);
-    }
-
-    inline BoundaryShearPeriodic& set_boundary_shear_periodic() {
-      do_boundaries = true;
-      delete bound_handler;
-      bound_handler = new BoundaryShearPeriodic;
-      return (BoundaryShearPeriodic&)(*bound_handler);
-    }
 
     inline size_t n() const { return particles.size(); }
     inline size_t n_real() const {

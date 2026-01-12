@@ -83,6 +83,12 @@ namespace rebound {
     delete bound_handler;
   }
 
+  void Simulation::rehash_particles() {
+    auto& map = ptr_hash->hash_map;
+    map.clear();
+    for (size_t i = 0; i < particles.size(); ++i) map[particles.ids[i]] = i;
+  }
+
   Particle Simulation::add_particle(const Vec3& position, const Vec3& velocity, double mu, double radius, uint32_t id, bool test_mass) {
     ptr_hash->hash_map.emplace(id, curr_idx++);
     return particles.add_particle(position, velocity, mu, radius, id, test_mass);
@@ -107,10 +113,8 @@ namespace rebound {
   }
 
   void Simulation::set_particles(const ParticleStore& particles_) {
-    auto& map = ptr_hash->hash_map;
-    map.clear();
     particles = particles_;
-    for (size_t i = 0; i < particles.size(); ++i) map[particles.ids[i]] = i;
+    rehash_particles();
   }
 
   double Simulation::time() const { return t; }
@@ -137,6 +141,7 @@ namespace rebound {
     if (do_collisions && coll_handler) if (CollisionLine* line_coll = dynamic_cast<CollisionLine*>(coll_handler)) line_coll->prev_pos = particles.positions;
     if (do_integration && integrator) integrator->step(particles, dt_);
     t += dt_;
+
 
     if (do_collisions && coll_handler) val = coll_handler->detect_collision(particles);
     if (do_boundaries && bound_handler) bound_handler->handle_boundary(particles);
