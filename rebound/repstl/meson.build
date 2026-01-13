@@ -16,5 +16,3 @@ repstl_dep = declare_dependency(
   link_with : repstl_lib,
   include_directories : repstl_includes
 )
-
-repstl_dep
