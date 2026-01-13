@@ -1,5 +1,4 @@
 # ... project setup ...
-
 project(
   'rebound-recode',
   'cpp',

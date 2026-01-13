@@ -1,5 +1,6 @@
 # rebound/meson.build
 
+subdir('repstl')
 current_deps = []
 current_deps += repstl_dep
 if get_option('openmp')

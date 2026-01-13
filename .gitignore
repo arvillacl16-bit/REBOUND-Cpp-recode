@@ -4,3 +4,6 @@
 /builddir
 /reference
 .clang-format
+test2.cpp
+test2
+native_file.ini
