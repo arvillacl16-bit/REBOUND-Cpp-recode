@@ -94,10 +94,6 @@ namespace rebound {
     versions.pop_back();
   }
 
-  Particle ParticleStore::operator[](size_t idx) {
-    return Particle(idx, this, versions[idx]);
-  }
-  ConstParticle ParticleStore::operator[](size_t idx) const {
-    return ConstParticle(idx, this, versions[idx]);
-  }
+  Particle ParticleStore::operator[](size_t idx) { return Particle(idx, this, versions[idx]); }
+  ConstParticle ParticleStore::operator[](size_t idx) const { return ConstParticle(idx, this, versions[idx]); }
 } // namespace rebound

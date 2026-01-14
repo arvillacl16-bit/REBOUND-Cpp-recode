@@ -1,9 +1,11 @@
 /.vscode
-*.obj
-*.exe
-/builddir
 /reference
 .clang-format
 test2.cpp
 test2
-native_file.ini
+test
+objfiles
+compile_commands.json
+*.sh
+lib.a
+/builddir

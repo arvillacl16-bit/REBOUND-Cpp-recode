@@ -20,9 +20,9 @@
  */
 
 #pragma once
-#include "../repstl/pair"
-#include "../repstl/string"
-#include "../repstl/vector"
+#include "repstl/pair"
+#include "repstl/string"
+#include "repstl/vector"
 #include "vec.hpp"
 #include <cassert>
 #include <cstdint>
@@ -86,6 +86,56 @@ namespace rebound {
         double_params == other.double_params &&
         int_params == other.int_params && hash_params == other.hash_params;
     }
+  };
+
+  class ConstParticle {
+  private:
+    size_t index;
+    uint32_t version;
+    const ParticleStore* store;
+    ConstParticle(const size_t idx, const ParticleStore* store_,
+      const uint32_t ver)
+      : index(idx), store(store_), version(ver) {
+    }
+
+    void check_ver() const {
+      if (version != store->versions[index]) {
+        throw repstl::RuntimeError(("Stale particle handle: invalid version at index " + repstl::ull_to_string(index)).c_str());
+      }
+    }
+
+  public:
+    const Vec3& pos() const {
+      check_ver();
+      return store->positions[index];
+    }
+    const Vec3& vel() const {
+      check_ver();
+      return store->velocities[index];
+    }
+    const Vec3& acc() const {
+      check_ver();
+      return store->accelerations[index];
+    }
+    const double& mu() const {
+      check_ver();
+      return store->mus[index];
+    }
+    const double& radius() const {
+      check_ver();
+      return store->radii[index];
+    }
+    const uint32_t& id() const {
+      check_ver();
+      return store->ids[index];
+    }
+    const bool& get_test_mass() const {
+      check_ver();
+      return store->test_mass[index];
+    }
+
+    friend ParticleStore;
+    friend Particle;
   };
 
   class Particle {
@@ -158,54 +208,7 @@ namespace rebound {
       return store->test_mass[index];
     }
 
-    friend ParticleStore;
-  };
-
-  class ConstParticle {
-  private:
-    size_t index;
-    uint32_t version;
-    const ParticleStore* store;
-    ConstParticle(const size_t idx, const ParticleStore* store_,
-      const uint32_t ver)
-      : index(idx), store(store_), version(ver) {
-    }
-
-    void check_ver() const {
-      if (version != store->versions[index]) {
-        throw repstl::RuntimeError(("Stale particle handle: invalid version at index " + repstl::ull_to_string(index)).c_str());
-      }
-    }
-
-  public:
-    const Vec3& pos() const {
-      check_ver();
-      return store->positions[index];
-    }
-    const Vec3& vel() const {
-      check_ver();
-      return store->velocities[index];
-    }
-    const Vec3& acc() const {
-      check_ver();
-      return store->accelerations[index];
-    }
-    const double& mu() const {
-      check_ver();
-      return store->mus[index];
-    }
-    const double& radius() const {
-      check_ver();
-      return store->radii[index];
-    }
-    const uint32_t& id() const {
-      check_ver();
-      return store->ids[index];
-    }
-    const bool& get_test_mass() const {
-      check_ver();
-      return store->test_mass[index];
-    }
+    operator ConstParticle() const { return ConstParticle(index, store, version); }
 
     friend ParticleStore;
   };

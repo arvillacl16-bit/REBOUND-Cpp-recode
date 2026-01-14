@@ -18,8 +18,8 @@
 
 #pragma once
 #include <cstddef>
-#include "../repstl/vector"
-#include "../repstl/pair"
+#include "repstl/vector"
+#include "repstl/pair"
 
 namespace rebound {
   class Simulation;
