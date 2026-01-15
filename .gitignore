@@ -5,7 +5,10 @@ test2.cpp
 test2
 test
 objfiles
-compile_commands.json
 *.sh
 lib.a
 /builddir
+compile_flags.txt
+.clangd
+compile_commands.json
+.cache
