@@ -17,7 +17,8 @@
  */
 
 #include "integrator.hpp"
-#include "../utils/transformations.hpp"
+#include "repstl/constants"
+#include "utils/transformations.hpp"
 #include <iostream>
 #include <cassert>
 
@@ -150,7 +151,7 @@ namespace rebound {
     constexpr unsigned int WHFAST_NMAX_QUART = 64;
     constexpr unsigned int WHFAST_NMAX_NEWT = 32;
 
-    inline void kepler_solver(const WHFast&, ParticleStore& p_j, double M, size_t i, double dt) {
+    void kepler_solver(const WHFast&, ParticleStore& p_j, double M, size_t i, double dt) {
       Particle p1 = p_j[i];
 
       double r0 = p1.pos().mag();
@@ -166,8 +167,8 @@ namespace rebound {
 
       if (beta > 0.) {
         double sqrt_beta = std::sqrt(beta);
-        invperiod = sqrt_beta * beta / (2 * M_PI * M);
-        X_per_period = 2 * M_PI / sqrt_beta;
+        invperiod = sqrt_beta * beta / (2 * repstl::numbers::pi * M);
+        X_per_period = 2 * repstl::numbers::pi / sqrt_beta;
 
         double dtr0i = dt * r0i;
         X = dtr0i * (1. - dtr0i * eta0 * 0.5 * r0i);
@@ -653,11 +654,13 @@ namespace rebound {
       internals.p_jh.accelerations.reserve(N);
       internals.p_jh.mus.reserve(N);
       internals.p_jh.test_mass.reserve(N);
+      internals.p_jh.versions.resize(N);
       std::copy(particles.positions.begin(), particles.positions.end(), internals.p_jh.positions.begin());
       std::copy(particles.velocities.begin(), particles.velocities.end(), internals.p_jh.velocities.begin());
       std::copy(particles.accelerations.begin(), particles.accelerations.end(), internals.p_jh.accelerations.begin());
       std::copy(particles.mus.begin(), particles.mus.end(), internals.p_jh.mus.begin());
-      std::copy(particles.test_mass.begin(), particles.test_mass.end(), internals.p_jh.test_mass.begin());
+      std::copy(particles.test_mass.begin(), particles.test_mass.end(),
+        internals.p_jh.test_mass.begin());
       recalc_coords_this_timestep = true;
     }
     return false;

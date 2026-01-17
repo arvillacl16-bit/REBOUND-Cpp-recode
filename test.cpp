@@ -85,5 +85,7 @@ int main() {
   repstl::String s("Hello!");
   for (char c : s) std::cout << c;
   std::cout << '\n';
+
+  check_whfast_correctness();
   return 0;
 }

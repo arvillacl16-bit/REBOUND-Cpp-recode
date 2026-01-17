@@ -23,7 +23,7 @@
 #include "repstl/pair"
 #include "repstl/string"
 #include "repstl/vector"
-#include "vec.hpp"
+#include "repstl/vec3"
 #include <cassert>
 #include <cstdint>
 
@@ -34,7 +34,7 @@ namespace rebound {
 
   template <typename T>
   using ExtParamMap =
-    repstl::Vector<repstl::pair<repstl::String, repstl::Vector<T>>>;
+    repstl::Vector<repstl::Pair<repstl::String, repstl::Vector<T>>>;
 
   template <typename T>
   repstl::Vector<T>& get(ExtParamMap<T>& map, repstl::String param) {
