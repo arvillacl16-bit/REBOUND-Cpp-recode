@@ -17,7 +17,7 @@
  */
 
 #pragma once
-#include "../utils/vec.hpp"
+#include "repstl/vec3"
 
 namespace rebound {
   struct ParticleStore;

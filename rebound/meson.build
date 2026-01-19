@@ -1,8 +1,6 @@
 # rebound/meson.build
 
-subdir('repstl')
 current_deps = []
-current_deps += repstl_dep
 if get_option('openmp')
   current_deps += omp_dep
 endif
@@ -19,7 +17,7 @@ rebound_sources = files(
   'utils/transformations.cpp'
 )
 
-rebound_includes = include_directories('.', 'integration', 'non_integration', 'utils')
+rebound_includes = include_directories('.', 'integration', 'non_integration', 'utils', '../repstl')
 
 rebound_lib = static_library(
   'rebound',

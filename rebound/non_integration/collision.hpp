@@ -40,7 +40,7 @@ namespace rebound {
 
   class CollisionHandler {
   public:
-    repstl::pair<bool, repstl::Vector<size_t>>(*handler)(const Collision& c) = nullptr;
+    repstl::Pair<bool, repstl::Vector<size_t>>(*handler)(const Collision& c) = nullptr;
     double eps = 0;
 
     virtual bool detect_collision(ParticleStore& particles) = 0;
@@ -60,7 +60,7 @@ namespace rebound {
   };
 
   namespace collision_handlers {
-    inline repstl::pair<bool, repstl::Vector<size_t>> halt(const Collision&) { return { true, {} }; }
-    repstl::pair<bool, repstl::Vector<size_t>> merge(const Collision& c);
+    inline repstl::Pair<bool, repstl::Vector<size_t>> halt(const Collision&) { return { true, {} }; }
+    repstl::Pair<bool, repstl::Vector<size_t>> merge(const Collision& c);
   }
 }

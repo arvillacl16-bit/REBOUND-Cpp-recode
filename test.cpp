@@ -78,14 +78,6 @@ void check_whfast_correctness() {
 
 int main() {
   namespace repstl = rebound::repstl;
-  repstl::Vector<int> v1{ 1, 2, 3 };
-  for (int el : v1) std::cout << el << ' ';
-  std::cout << '\n';
-
-  repstl::String s("Hello!");
-  for (char c : s) std::cout << c;
-  std::cout << '\n';
-
   check_whfast_correctness();
   return 0;
 }

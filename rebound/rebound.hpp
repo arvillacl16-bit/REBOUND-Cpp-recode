@@ -21,6 +21,7 @@
 #include "integration/integrator.hpp"
 #include "non_integration/collision.hpp"
 #include "non_integration/boundary.hpp"
+#include "repstl/memory"
 
 namespace rebound {
   class Simulation {
@@ -28,14 +29,14 @@ namespace rebound {
     double t;
 
     struct hashmap;
-    hashmap* ptr_hash;
+    repstl::UniquePtr<hashmap> ptr_hash;
 
     size_t curr_idx = 0;
 
     ParticleStore particles;
-    Integrator* integrator = nullptr;
-    CollisionHandler* coll_handler = nullptr;
-    BoundaryHandler* bound_handler = nullptr;
+    repstl::UniquePtr<Integrator> integrator;
+    repstl::UniquePtr<CollisionHandler> coll_handler;
+    repstl::UniquePtr<BoundaryHandler> bound_handler;
 
     bool do_integration = true;
     bool do_collisions = false;
@@ -49,7 +50,7 @@ namespace rebound {
 
     Simulation();
     explicit Simulation(const repstl::String& filename);
-    ~Simulation();
+    ~Simulation() = default;
     Simulation(const Simulation& sim);
     Simulation(Simulation&& sim);
     Simulation& operator=(const Simulation& sim);
@@ -65,27 +66,21 @@ namespace rebound {
     template <typename integrator_tp>
     integrator_tp& set_integrator() {
       do_integration = false;
-      integrator_tp* new_integator = new integrator_tp;
-      delete integrator;
-      integrator = new_integator;
+      integrator = repstl::UniquePtr<Integrator>(new integrator_tp);
       return static_cast<integrator_tp&>(*integrator);
     }
 
     template <typename collision_tp>
     collision_tp& set_collision_handler() {
       do_collisions = true;
-      collision_tp* new_coll_handler = new collision_tp;
-      delete coll_handler;
-      coll_handler = new_coll_handler;
+      coll_handler = repstl::UniquePtr<CollisionHandler>(new collision_tp);
       return static_cast<collision_tp&>(*coll_handler);
     }
 
     template <typename boundary_tp>
     boundary_tp& set_boundary_handler() {
       do_boundaries = true;
-      boundary_tp* new_bound_handler = new boundary_tp;
-      delete bound_handler;
-      bound_handler = new_bound_handler;
+      bound_handler = repstl::UniquePtr<BoundaryHandler>(new boundary_tp);
       return static_cast<boundary_tp&>(*bound_handler);
     }
 

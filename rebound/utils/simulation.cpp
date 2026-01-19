@@ -36,15 +36,11 @@ namespace rebound {
   }
 
   Simulation::Simulation(Simulation&& other)
-    : ptr_hash(other.ptr_hash), do_integration(other.do_integration), do_boundaries(other.do_boundaries), do_collisions(other.do_collisions),
-    integrator(other.integrator), coll_handler(other.coll_handler), bound_handler(other.bound_handler) {
-    other.ptr_hash = nullptr;
+    : ptr_hash(std::move(other.ptr_hash)), do_integration(other.do_integration), do_boundaries(other.do_boundaries), do_collisions(other.do_collisions),
+    integrator(std::move(other.integrator)), coll_handler(std::move(other.coll_handler)), bound_handler(std::move(other.bound_handler)) {
     other.do_integration = false;
     other.do_boundaries = false;
     other.do_collisions = false;
-    other.integrator = nullptr;
-    other.coll_handler = nullptr;
-    other.bound_handler = nullptr;
   }
 
   Simulation& Simulation::operator=(const Simulation& other) {
@@ -57,30 +53,17 @@ namespace rebound {
   Simulation& Simulation::operator=(Simulation&& other) {
     if (this == &other) return *this;
 
-    delete ptr_hash;
-    delete integrator;
-    delete coll_handler;
-    delete bound_handler;
-
-    ptr_hash = other.ptr_hash;
-    other.ptr_hash = nullptr;
+    ptr_hash = std::move(other.ptr_hash);
 
     do_integration = other.do_integration; other.do_integration = false;
     do_collisions = other.do_collisions; other.do_collisions = false;
     do_boundaries = other.do_boundaries; other.do_boundaries = false;
-    integrator = other.integrator; other.integrator = nullptr;
-    coll_handler = other.coll_handler; other.coll_handler = nullptr;
-    bound_handler = other.bound_handler; other.bound_handler = nullptr;
+    integrator = std::move(other.integrator);
+    coll_handler = std::move(other.coll_handler);
+    bound_handler = std::move(other.bound_handler);
 
     particles = std::move(other.particles);
     return *this;
-  }
-
-  Simulation::~Simulation() {
-    delete ptr_hash;
-    delete integrator;
-    delete coll_handler;
-    delete bound_handler;
   }
 
   void Simulation::rehash_particles() {
@@ -139,10 +122,9 @@ namespace rebound {
   bool Simulation::step(double dt_) {
     bool val = false;
 
-    if (do_collisions && coll_handler) if (CollisionLine* line_coll = dynamic_cast<CollisionLine*>(coll_handler)) line_coll->prev_pos = particles.positions;
+    if (do_collisions && coll_handler) if (CollisionLine* line_coll = dynamic_cast<CollisionLine*>(coll_handler.get())) line_coll->prev_pos = particles.positions;
     if (do_integration && integrator) integrator->step(particles, dt_);
     t += dt_;
-
 
     if (do_collisions && coll_handler) val = coll_handler->detect_collision(particles);
     if (do_boundaries && bound_handler) bound_handler->handle_boundary(particles);

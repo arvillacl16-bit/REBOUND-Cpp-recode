@@ -1,0 +1,103 @@
+#pragma once
+#include <stddef.h>
+
+namespace rebound::repstl {
+  template <typename T>
+  class UniquePtr {
+  private:
+    T* data;
+  public:
+    UniquePtr() : data(nullptr) {}
+    explicit UniquePtr(T* raw) : data(raw) {}
+    UniquePtr(UniquePtr&& other) : data(other.data) { other.data = nullptr; }
+    UniquePtr& operator=(UniquePtr&& other) noexcept {
+      if (this != &other) {
+        delete data;
+        data = other.data;
+        other.data = nullptr;
+        return *this;
+      }
+      return *this;
+    }
+
+    ~UniquePtr() { delete data; }
+
+    UniquePtr(const UniquePtr&) = delete;
+    UniquePtr& operator=(const UniquePtr&) = delete;
+
+    T* operator->() { return data; }
+    T& operator*() { return *data; }
+
+    const T* operator->() const { return data; }
+    const T& operator*() const { return *data; }
+
+    explicit operator bool() { return data; }
+
+    T* release() {
+      T* res = data;
+      data = nullptr;
+      return res;
+    }
+
+    T* get() { return data; }
+    const T* get() const { return data; }
+
+    void reset(T* newptr = nullptr) {
+      if (data != newptr) {
+        delete data;
+        data = newptr;
+      }
+    }
+  };
+
+  template <typename T>
+  class UniquePtr<T[]> {
+  private:
+    T* data;
+  public:
+    UniquePtr() : data(nullptr) {}
+    explicit UniquePtr(T* raw) : data(raw) {}
+    UniquePtr(UniquePtr&& other) : data(other.data) { other.data = nullptr; }
+    UniquePtr& operator=(UniquePtr&& other) noexcept {
+      if (this != &other) {
+        delete[] data;
+        data = other.data;
+        other.data = nullptr;
+        return *this;
+      }
+      return *this;
+    }
+
+    ~UniquePtr() { delete[] data; }
+
+    UniquePtr(const UniquePtr&) = delete;
+    UniquePtr& operator=(const UniquePtr&) = delete;
+
+    T& operator[](size_t idx) { return data[idx]; }
+    const T& operator[](size_t idx) const { return data[idx]; }
+
+    T* operator->() { return data; }
+    T& operator*() { return *data; }
+
+    const T* operator->() const { return data; }
+    const T& operator*() const { return *data; }
+
+    explicit operator bool() const { return data; }
+
+    T* release() {
+      T* res = data;
+      data = nullptr;
+      return res;
+    }
+
+    T* get() { return data; }
+    const T* get() const { return data; }
+
+    void reset(T* newptr = nullptr) {
+      if (data != newptr) {
+        delete[] data;
+        data = newptr;
+      }
+    }
+  };
+}

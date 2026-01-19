@@ -70,7 +70,7 @@ namespace rebound {
 
     inline double fast_abs(double x) { return (x > 0.) ? x : -x; }
 
-    inline void stumpff_cs(double* cs, double z) {
+    void stumpff_cs(double* cs, double z) {
       unsigned int n = 0;
       while (fast_abs(z) > 0.1) {
         z = z / 4.;
@@ -98,7 +98,7 @@ namespace rebound {
       }
     }
 
-    inline void stumpff_cs3(double* cs, double z) {
+    void stumpff_cs3(double* cs, double z) {
       unsigned int n = 0;
       while (fast_abs(z) > 0.1) {
         z = z / 4.;
@@ -125,7 +125,7 @@ namespace rebound {
       }
     }
 
-    inline void stiefel_Gs(double* Gs, double beta, double X) {
+    void stiefel_Gs(double* Gs, double beta, double X) {
       double X2 = X * X;
       stumpff_cs(Gs, beta * X2);
       Gs[1] *= X;
@@ -139,7 +139,7 @@ namespace rebound {
       return;
     }
 
-    inline void stiefel_Gs3(double* Gs, double beta, double X) {
+    void stiefel_Gs3(double* Gs, double beta, double X) {
       double X2 = X * X;
       stumpff_cs3(Gs, beta * X2);
       Gs[1] *= X;
@@ -262,6 +262,11 @@ namespace rebound {
       double fd = -M * Gs[1] * r0i * ri;
       double gd = -M * Gs[2] * ri;
 
+      LOG(f);
+      LOG(g);
+      LOG(fd);
+      LOG(gd);
+
       p_j[i].pos() += f * p1.pos() + g * p1.vel();
       p_j[i].vel() += fd * p1.pos() + gd * p1.vel();
     }
@@ -379,7 +384,6 @@ namespace rebound {
     void kepler_step(ParticleStore& particles, WHFast& settings, double dt) {
       double m0 = particles.mus[0];
       ParticleStore& p_j = settings.internals.p_jh;
-      ParticleStore cpy = p_j;
       double eta = m0;
       size_t N = particles.size();
       switch (settings.coordinates) {
@@ -424,8 +428,6 @@ namespace rebound {
           break;
         }
       }
-
-      LOG((p_j == cpy));
     }
 
     void com_step(ParticleStore& p_j, double dt) { p_j.positions[0] += dt * p_j.velocities[0]; }
