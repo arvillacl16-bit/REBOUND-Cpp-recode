@@ -1,6 +1,8 @@
 # C++ Version of REBOUND
 
 This is a work-in-progress reimplementation of REBOUND (a C n-body integrator). The goal is to keep the same functionality but provide it in a more modern form without sacrificing performance.
+*EDIT:
+Work on this has stopped as I am working on a new integrator.
 
 ## Requirements
 
